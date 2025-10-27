@@ -2,6 +2,7 @@ package com.example.prologuefrontend.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,43 +25,47 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
+import com.example.prologuefrontend.data.model.Book
 
 @Composable
-fun CurrentReadingCard(){
+fun CurrentReadingCard(book: Book){
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF1A1A1A)
         ),
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .width(260.dp) // ✅ fixed width for horizontal slider
+            .height(IntrinsicSize.Min)
 
     ){
         Row(Modifier.padding(16.dp)){
             Image(
-                painter = rememberAsyncImagePainter("https://covers.openlibrary.org/b/id/10523357-L.jpg"),
-                contentDescription = null,
+                painter = rememberAsyncImagePainter(book.coverUrl),
+                contentDescription = book.title,
                 modifier = Modifier
                     .size(80.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
             Spacer(Modifier.width(16.dp))
+
             Column(Modifier.align(Alignment.CenterVertically)){
-                Text("Currently Reading", color = Color.White.copy(alpha = 0.7f))
                 Text(
-                    "Onyx Storm (The Empyrean, #3)",
+                    book.title,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
-                Text("By Rebecca Yarros", color = Color.White.copy(alpha = 0.7f))
+                Text("By ${book.author}", color = Color.White.copy(alpha = 0.7f))
                 Spacer(Modifier.height(8.dp))
                 LinearProgressIndicator(
-                    progress = { 0.8f },
+                    progress = { book.progress/100f },
                     modifier = Modifier.fillMaxWidth(0.8f),
                     color = Color.White,
                     trackColor = Color.Gray,
                 )
                 Text(
-                    "80% completed · 20 minutes left",
+                    "${book.progress}% completed",
                     color = Color.White.copy(alpha = 0.7f),
                     fontSize = 12.sp
                 )
