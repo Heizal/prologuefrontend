@@ -12,8 +12,10 @@ import com.example.prologuefrontend.R
 // Set of Material typography styles to start with
 val Montserrat = FontFamily(
     Font(R.font.montserrat_regular, FontWeight.Normal),
+    Font(R.font.montserrat_medium, FontWeight.Medium ),
     Font(R.font.montserrat_bold, FontWeight.Bold),
-            Font(R.font.montserrat_italic, FontWeight.Normal, FontStyle.Italic)
+    Font(R.font.montserrat_italic, FontWeight.Normal, FontStyle.Italic),
+
 )
 
 val Garamond = FontFamily(
@@ -27,7 +29,8 @@ val AppTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Bold,
-        fontSize = 28.sp
+        fontSize = 28.sp,
+        lineHeight = 32.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = Montserrat,
@@ -42,7 +45,8 @@ val AppTypography = Typography(
     bodyLarge = TextStyle(
         fontFamily = Garamond,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
+        fontSize = 16.sp,
+        lineHeight = 22.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = Garamond,
@@ -52,6 +56,6 @@ val AppTypography = Typography(
     bodySmall = TextStyle(
         fontFamily = Garamond,
         fontWeight = FontWeight.Light,
-        fontSize = 12.sp
+        fontSize = 13.sp
     )
 )
