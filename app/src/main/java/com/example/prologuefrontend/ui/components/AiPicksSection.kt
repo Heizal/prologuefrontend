@@ -14,15 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.prologuefrontend.ui.viewmodels.AIPickState
-import com.example.prologuefrontend.ui.viewmodels.AIPickViewModel
-import com.example.prologuefrontend.data.model.AIPick
+import com.example.prologuefrontend.ui.viewmodels.DiscoverUiState
+import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
 
 
 @Composable
-fun AIPicksSection(viewModel: AIPickViewModel = viewModel()) {
-    val state by viewModel.state.collectAsState()
+fun AIPicksSection(viewModel: DiscoverViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsState()
 
     Column {
         Row(
@@ -34,15 +34,39 @@ fun AIPicksSection(viewModel: AIPickViewModel = viewModel()) {
         }
         Spacer(Modifier.height(8.dp))
         when (state){
-            is AIPickState.Loading ->{
+            is DiscoverUiState.Loading ->{
                 Text("Loading...", color = Color.Gray)
             }
-            is AIPickState.Error ->{
+            is DiscoverUiState.Error ->{
                 Text("Error loading AI picks", color = Color.Red)
             }
-            is AIPickState.Success ->{
-                val pick = (state as AIPickState.Success).data
-                AIPickCard(pick)
+
+            is DiscoverUiState.Chat    -> {
+                Text(
+                    "Chat in progress... go to Discover to continue your conversation.",
+                    color = Color.Gray
+                )
+            }
+            DiscoverUiState.Initial    -> {
+                Text(
+                    "No AI picks yet. Start a chat on the Discover tab to get recommendations!",
+                    color = Color.Gray
+                )
+            }
+            is DiscoverUiState.Recommendations -> {
+                val recs = (state as DiscoverUiState.Recommendations).books
+                if (recs.isEmpty()) {
+                    Text("No recommendations right now.", color = Color.Gray)
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        recs.take(3).forEach { book ->
+                            Text(
+                                text = "• ${book.title} by ${book.author}",
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
             }
         }
     }

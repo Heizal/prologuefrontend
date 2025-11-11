@@ -1,10 +1,15 @@
 package com.example.prologuefrontend.data.repository
 
 import com.example.prologuefrontend.data.model.Book
-import com.example.prologuefrontend.data.remote.RetrofitInstance
+import com.example.prologuefrontend.data.remote.ApiService
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
-class BookRepository {
+@Singleton
+class BookRepository  @Inject constructor(
+    private val api: ApiService
+) {
     suspend fun getBooks(): List<Book> {
-        return RetrofitInstance.api.getBooks()
+        return api.getBooks()
     }
 }

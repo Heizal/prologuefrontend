@@ -19,7 +19,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.prologuefrontend.ui.components.AIPicksSection
 import com.example.prologuefrontend.ui.components.BottomNavBar
 import com.example.prologuefrontend.ui.components.CurrentReadingCard
@@ -30,55 +32,43 @@ import com.example.prologuefrontend.ui.viewmodels.HomeViewModel
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel()){
+fun HomeScreen(
+    navController: NavHostController,
+) {
+    val homeViewModel: HomeViewModel = hiltViewModel()
     val books by homeViewModel.books.collectAsState()
 
-    Scaffold(
-        bottomBar = {BottomNavBar()},
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
-            LazyColumn(
-                contentPadding = innerPadding,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 20.dp)
-            ) {
-                item{GreetingSection(username = "Heizal")}
-                item{Spacer(Modifier.height(16.dp))}
+    // ✅ Removed Scaffold — NavGraph’s Scaffold already wraps this
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item { GreetingSection(username = "Heizal") }
 
-                if (books.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Currently Reading",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-
-                        Spacer(Modifier.height(8.dp))
-
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp)
-                        ) {
-                            items(books) { book ->
-                                CurrentReadingCard(book = book)
-                            }
-                        }
-
-                        Spacer(Modifier.height(24.dp))
+        if (books.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Currently Reading",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(Modifier.height(8.dp))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(books) { book ->
+                        CurrentReadingCard(book = book)
                     }
                 }
-
-                item { AIPicksSection() }
-                item { Spacer(Modifier.height(24.dp)) }
-
-                item { RediscoverSection() }
-                item { Spacer(Modifier.height(24.dp)) }
-
-                item { RecentActivitySection() }
-                item { Spacer(Modifier.height(80.dp)) }
             }
+        }
+
+        item { AIPicksSection() }
+        item { RediscoverSection() }
+        item { RecentActivitySection() }
+        item { Spacer(Modifier.height(80.dp)) } // space above nav bar
     }
 }
