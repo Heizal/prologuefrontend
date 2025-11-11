@@ -10,7 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun ChatMessageBubble(
@@ -18,7 +20,6 @@ fun ChatMessageBubble(
     message: String,
     modifier: Modifier = Modifier
 ) {
-    val bg = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val content = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
     val align = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
 
@@ -27,16 +28,15 @@ fun ChatMessageBubble(
         contentAlignment = align
     ) {
         Surface(
-            color = bg,
             contentColor = content,
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
             Text(
                 text = message,
-                modifier = Modifier
-                    .widthIn(max = 280.dp)
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    lineHeight = 20.sp,
+                    fontWeight = if (isUser) FontWeight.Medium else FontWeight.Normal
+                )
             )
         }
     }

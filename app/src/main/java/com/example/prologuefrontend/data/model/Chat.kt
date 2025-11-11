@@ -1,7 +1,5 @@
 package com.example.prologuefrontend.data.model
 
-import com.google.gson.annotations.SerializedName
-
 data class ChatMessage (
     val id: String = java.util.UUID.randomUUID().toString(),
     val text: String,
@@ -18,7 +16,6 @@ data class RecommendationBookDto(
     val title: String,
     val author: String,
     val thumbnailUrl: String,
-    //@SerializedName("thumbnailUrl") val coverUrl: String,
     val description: String
 )
 

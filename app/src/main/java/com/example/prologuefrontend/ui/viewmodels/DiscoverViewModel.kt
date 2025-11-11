@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 sealed interface DiscoverUiState {
     data object Initial : DiscoverUiState
     data class Chat(
-        val messages: List<ChatMessage>
+        val messages: List<ChatMessage>,
+        val recommendations: List<RecommendationBookDto> = emptyList()
     ) : DiscoverUiState
     data class Recommendations(
         val assistantMessage: String,

@@ -1,5 +1,6 @@
 package com.example.prologuefrontend.ui.screens
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.BitmapDrawable
 import android.view.Surface
 import androidx.compose.foundation.background
@@ -246,6 +247,7 @@ private fun ChatView(messages: List<ChatMessage>) {
     }
 }
 
+@SuppressLint("InvalidColorHexValue")
 @Composable
 private fun RecommendationsView(
     assistantMessage: String,
@@ -259,91 +261,27 @@ private fun RecommendationsView(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Text(assistantMessage, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                assistantMessage,
+                maxLines = 5,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(Modifier.height(16.dp))
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Perfect for you Right Now", fontWeight = FontWeight.SemiBold)
+                Text("Perfect for you Right Now", fontWeight = FontWeight.Bold)
                 TextButton(onClick = onAskAgain) {
-                    Text("Ask Again", color = MaterialTheme.colorScheme.primary)
+                    Text("Ask Again", color = Color(0xFF2B2D30))
                 }
             }
             Divider()
         }
         items(books) { book ->
             RecommendationCard(book, inLibrary.contains(book.id), onAdd)
-        }
-    }
-}
-
-@Composable
-fun RecommendationCard(book: RecommendationBookDto, isInLibrary: Boolean, onAdd: (String) -> Unit) {
-    val context = LocalContext.current
-    var gradient by remember { mutableStateOf(Pair(Color(0xFFF5F5F5), Color(0xFFE0E0E0))) }
-
-    // Extract dominant color
-    LaunchedEffect(book.thumbnailUrl) {
-        val loader = ImageLoader(context)
-        val req = ImageRequest.Builder(context)
-            .data(book.thumbnailUrl)
-            .allowHardware(false)
-            .build()
-        val result = loader.execute(req).image
-        val bmp = (result as? BitmapDrawable)?.bitmap
-        bmp?.let {
-            val p = Palette.from(it).generate()
-            val dom = p.getDominantColor(0xFFE0E0E0.toInt())
-            gradient = Pair(Color(dom).copy(alpha = 0.85f), Color(dom).copy(alpha = 0.55f))
-        }
-    }
-
-    Surface(
-        shape = RoundedCornerShape(20.dp),
-        tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .background(Brush.verticalGradient(listOf(gradient.first, gradient.second)))
-                .padding(16.dp)
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AsyncImage(
-                    model = book.thumbnailUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(10.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                Column(Modifier.weight(1f)) {
-                    Text(book.title, fontWeight = FontWeight.SemiBold)
-                    Text("By ${book.author}", style = MaterialTheme.typography.bodySmall)
-                    Spacer(Modifier.height(8.dp))
-                    SuggestionChip(
-                        onClick = { if (!isInLibrary) onAdd(book.id) },
-                        label = {
-                            Text(
-                                if (isInLibrary) "In your library" else "+ Add",
-                                color = if (isInLibrary) MaterialTheme.colorScheme.onPrimaryContainer else Color.Black
-                            )
-                        },
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = if (isInLibrary) MaterialTheme.colorScheme.primaryContainer else Color.White
-                        )
-                    )
-                }
-            }
-            Spacer(Modifier.height(12.dp))
-            Text(
-                book.description.split("\n").firstOrNull().orEmpty(),
-                maxLines = 5,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.prologuefrontend.data.remote
 
-import com.example.prologuefrontend.data.model.AIPick
 import com.example.prologuefrontend.data.model.AddBookRequest
 import com.example.prologuefrontend.data.model.AddBookResponse
 import com.example.prologuefrontend.data.model.Book
