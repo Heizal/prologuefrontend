@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -38,8 +37,8 @@ import com.example.prologuefrontend.data.model.Book
 @Composable
 fun CurrentReadingCard(book: Book){
     val backgroundColor = Color(0xFFE5E8EC) // soft gray like your default image background
-    val imagePainter = if (!book.coverUrl.isNullOrBlank()) {
-        rememberAsyncImagePainter(book.coverUrl)
+    val imagePainter = if (!book.thumbnailUrl.isNullOrBlank()) {
+        rememberAsyncImagePainter(book.thumbnailUrl)
     } else {
         painterResource(id = R.drawable.default_cover)
     }

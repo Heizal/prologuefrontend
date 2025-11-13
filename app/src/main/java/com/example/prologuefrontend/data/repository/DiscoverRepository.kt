@@ -2,6 +2,7 @@ package com.example.prologuefrontend.data.repository
 
 import com.example.prologuefrontend.data.model.AddBookRequest
 import com.example.prologuefrontend.data.model.AddBookResponse
+import com.example.prologuefrontend.data.model.Book
 import com.example.prologuefrontend.data.model.RecommendationRequest
 import com.example.prologuefrontend.data.model.RecommendationResponse
 import com.example.prologuefrontend.data.remote.ApiService
@@ -16,7 +17,8 @@ class DiscoverRepository @Inject constructor(
         return api.getRecommendations(RecommendationRequest(prompt))
     }
 
-    suspend fun addBookToLibrary(bookId: String): AddBookResponse{
-        return api.addBook(AddBookRequest(bookId))
+    suspend fun addBookToLibrary(book: Book): Book {
+        return api.addBook(book)
+
     }
 }

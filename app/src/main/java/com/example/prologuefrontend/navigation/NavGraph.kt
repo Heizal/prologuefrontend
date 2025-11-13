@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.prologuefrontend.ui.components.BottomNavBar
 import com.example.prologuefrontend.ui.screens.DiscoverScreen
 import com.example.prologuefrontend.ui.screens.HomeScreen
+import com.example.prologuefrontend.ui.screens.MyBooksScreen
 
 @Composable
 fun NavGraph(navController: NavHostController = rememberNavController()) {
@@ -24,6 +25,7 @@ fun NavGraph(navController: NavHostController = rememberNavController()) {
         ){
             composable("home") { HomeScreen(navController) }
             composable ("discover" ){DiscoverScreen()}
+            composable ("myBooks"){ MyBooksScreen() }
         }
 
     }

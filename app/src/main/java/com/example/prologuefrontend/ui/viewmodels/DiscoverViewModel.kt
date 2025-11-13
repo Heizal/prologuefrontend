@@ -1,8 +1,12 @@
 package com.example.prologuefrontend.ui.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.prologuefrontend.data.model.Book
 import com.example.prologuefrontend.data.model.ChatMessage
 import com.example.prologuefrontend.data.model.RecommendationBookDto
 import com.example.prologuefrontend.data.repository.DiscoverRepository
@@ -37,22 +41,24 @@ class DiscoverViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<DiscoverUiState>(DiscoverUiState.Initial)
     val uiState: StateFlow<DiscoverUiState> = _uiState
 
+    var lastUserPrompt by mutableStateOf<String?>(null)
+        private set
+
     private val chatHistory = mutableListOf<ChatMessage>()
 
     fun selectQuickPrompt(text: String) = sendUserMessage(text)
 
-    fun sendUserMessage(text: String) {
-        if (text.isBlank()) return
-        val userMsg = ChatMessage(text = text.trim(), isUser = true)
-        chatHistory += userMsg
-        _uiState.value = DiscoverUiState.Chat(chatHistory.toList())
+    fun sendUserMessage(message: String) {
+        lastUserPrompt = message
+        _uiState.value = DiscoverUiState.Loading
+        chatHistory.add(ChatMessage(id = System.currentTimeMillis().toString(), text = message, isUser = true))
 
         viewModelScope.launch {
             _uiState.value = DiscoverUiState.Loading
             try {
-                val res = repo.fetchRecommendations(text)
-                val aiMsg = ChatMessage(text = res.message, isUser = false)
-                chatHistory += aiMsg
+                val res = repo.fetchRecommendations(message)
+                // record assistant response
+                chatHistory.add(ChatMessage(id = "ai_${System.currentTimeMillis()}", text = res.message, isUser = false))
                 _uiState.value = DiscoverUiState.Recommendations(
                     assistantMessage = res.message,
                     books = res.recommendations,
@@ -65,18 +71,28 @@ class DiscoverViewModel @Inject constructor(
         }
     }
 
-    fun addBook(bookId: String) {
+    fun addBook(book: RecommendationBookDto) {
         val current = _uiState.value
         if (current is DiscoverUiState.Recommendations) {
             _uiState.update {
-                current.copy(inLibrary = current.inLibrary + bookId)
+                current.copy(inLibrary = current.inLibrary + book.id)
             }
+
             viewModelScope.launch {
                 try {
-                    repo.addBookToLibrary(bookId)
+                    val newBook = Book(
+                        id = book.id,
+                        title = book.title,
+                        author = book.author,
+                        thumbnailUrl = book.thumbnailUrl,
+                        progress = 0f
+                    )
+
+                    repo.addBookToLibrary(newBook)
+
                 } catch (_: Throwable) {
                     _uiState.update {
-                        current.copy(inLibrary = current.inLibrary - bookId)
+                        current.copy(inLibrary = current.inLibrary - book.id)
                     }
                 }
             }
@@ -84,29 +100,38 @@ class DiscoverViewModel @Inject constructor(
     }
 
     fun askAgain() {
-        val lastUser = chatHistory.lastOrNull { it.isUser }?.text ?: run {
+        val lastPrompt = lastUserPrompt
+        if (lastPrompt.isNullOrBlank()) {
             _uiState.value = DiscoverUiState.Initial
             return
         }
-        sendUserMessage(lastUser)
+
+        _uiState.value = DiscoverUiState.Loading
+
+        viewModelScope.launch {
+            try {
+                val res = repo.fetchRecommendations(lastPrompt)
+                chatHistory.add(ChatMessage(id = "ai_${System.currentTimeMillis()}", text = res.message, isUser = false))
+
+                _uiState.value = DiscoverUiState.Recommendations(
+                    assistantMessage = res.message,
+                    books = res.recommendations,
+                    inLibrary = emptySet()
+                )
+            } catch (t: Throwable) {
+                _uiState.value = DiscoverUiState.Error(t.message ?: "Request timed out")
+            }
+        }
     }
 
     fun startNewChat() {
-        chatHistory.clear() // Clear the previous conversation history
-        _uiState.value = DiscoverUiState.Initial // Reset the UI to the initial state
+        lastUserPrompt = null
+        chatHistory.clear()
+        _uiState.value = DiscoverUiState.Initial
     }
 
     fun loadConversation(id: String) {
-        // For now, we'll treat loading a past conversation as starting a new chat
-        // because the logic to fetch and display old messages isn't implemented yet.
         startNewChat()
-        // In the future, this would be:
-        // viewModelScope.launch {
-        //     val messages = repo.getConversation(id)
-        //     chatHistory.clear()
-        //     chatHistory.addAll(messages)
-        //     _uiState.value = DiscoverUiState.Chat(chatHistory.toList())
-        // }
     }
 
 }
