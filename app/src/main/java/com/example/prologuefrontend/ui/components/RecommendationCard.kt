@@ -37,7 +37,7 @@ import com.example.prologuefrontend.data.model.RecommendationBookDto
 fun RecommendationCard(
     book: RecommendationBookDto,
     isInLibrary: Boolean,
-    onAddClick: (String) -> Unit,
+    onAddClick: (RecommendationBookDto) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -93,7 +93,7 @@ fun RecommendationCard(
                     )
                     Spacer(Modifier.height(8.dp))
                     Button(
-                        onClick = { if (!isInLibrary) onAddClick(book.id) },
+                        onClick = { if (!isInLibrary) onAddClick(book) },
                         enabled = !isInLibrary,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isInLibrary)

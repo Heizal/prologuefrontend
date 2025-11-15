@@ -7,7 +7,7 @@ enum class ReadingState {
 }
 
 data class Book(
-    val id: String,
+    val id: String? = null,
     val title: String,
     val author: String,
     val thumbnailUrl: String,

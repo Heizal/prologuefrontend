@@ -1,6 +1,7 @@
 package com.example.prologuefrontend.ui.viewmodels
 
 import android.util.Log
+import android.util.Log.e
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -80,6 +81,7 @@ class DiscoverViewModel @Inject constructor(
 
             viewModelScope.launch {
                 try {
+                    Log.d("DiscoverViewModel", "📚 Sending book to backend: ${book.title}")
                     val newBook = Book(
                         id = book.id,
                         title = book.title,
@@ -89,8 +91,10 @@ class DiscoverViewModel @Inject constructor(
                     )
 
                     repo.addBookToLibrary(newBook)
+                    Log.d("DiscoverViewModel", "✅ Added to backend: ${book.title}")
 
-                } catch (_: Throwable) {
+                } catch (e: Throwable) {
+                    Log.e("DiscoverViewModel", "❌ Failed to add book", e)
                     _uiState.update {
                         current.copy(inLibrary = current.inLibrary - book.id)
                     }

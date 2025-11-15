@@ -180,7 +180,8 @@ fun BookSection(title: String, books: List<Book>) {
             Text(
                 text = "More",
                 color = Color(0xFF4D884F),
-                fontWeight = FontWeight.Medium
+                style= MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
         }
 
