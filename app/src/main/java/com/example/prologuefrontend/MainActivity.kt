@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.prologuefrontend.navigation.NavGraph
+import androidx.navigation.compose.rememberNavController
+import com.example.prologuefrontend.navigation.RootNavGraph
 import com.example.prologuefrontend.ui.theme.PrologueTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PrologueTheme {
-                NavGraph()
+                val navController = rememberNavController()
+                RootNavGraph(navController = navController)
             }
         }
     }

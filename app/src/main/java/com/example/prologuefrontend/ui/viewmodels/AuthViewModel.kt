@@ -4,8 +4,10 @@ import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prologuefrontend.data.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed class AuthState{
     object Idle: AuthState()
@@ -13,7 +15,8 @@ sealed class AuthState{
     object Success : AuthState()
     data class Error(val message: String) : AuthState()
 }
-class AuthViewModel(
+@HiltViewModel
+class AuthViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)

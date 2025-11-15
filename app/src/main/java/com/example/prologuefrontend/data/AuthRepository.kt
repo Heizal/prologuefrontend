@@ -4,8 +4,13 @@ import com.example.prologuefrontend.network.auth.AuthApi
 import com.example.prologuefrontend.network.auth.dto.AuthResponse
 import com.example.prologuefrontend.network.auth.dto.LoginRequest
 import com.example.prologuefrontend.network.auth.dto.SignupRequest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AuthRepository(
+@Singleton
+class AuthRepository @Inject constructor(
     private val localDataSource: AuthLocalDataSource,
     private val api: AuthApi
 ) {
@@ -22,6 +27,10 @@ class AuthRepository(
     }
 
     fun getToken() = localDataSource.getToken()
+
+    fun isLoggedIn(): Boolean {
+        return runBlocking { localDataSource.getToken().first() != null }
+    }
 
     suspend fun logout() = localDataSource.clear()
 }

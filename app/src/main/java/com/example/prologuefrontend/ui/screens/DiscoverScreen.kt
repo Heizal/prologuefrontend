@@ -278,39 +278,7 @@ private fun InitialDiscoverLayout(onChip: (String) -> Unit, modifier: Modifier) 
         }
     }
 }
-
 @Composable
-/*private fun DiscoverInputBar(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSend: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        tonalElevation = 0.dp,
-        color = Color.White,
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {}) { Icon(Icons.Default.Add, null, tint = Color.Black) }
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Ask me anything") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(onSend = { onSend() })
-            )
-        }
-    }
-}*/
 private fun DiscoverInputBar(
     value: String,
     onValueChange: (String) -> Unit,
