@@ -40,6 +40,7 @@ fun SignupScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
     LaunchedEffect(state) {
@@ -59,6 +60,15 @@ fun SignupScreen(
 
         Text("Create your account", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
@@ -97,7 +107,7 @@ fun SignupScreen(
         Button(
             onClick = {
                 if (password == confirmPassword) {
-                    viewModel.signup(email, password)
+                    viewModel.signup(username, email, password)
                 }
             },
             modifier = Modifier.fillMaxWidth(),

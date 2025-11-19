@@ -1,6 +1,8 @@
 package com.example.prologuefrontend.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,13 +13,15 @@ fun RootNavGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
-    val startDestination = if (mainViewModel.authRepository.isLoggedIn()) "main" else "auth"
+    val startDest by mainViewModel.startDestination.collectAsState()
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        authGraph(navController)
-        mainGraph(navController)
+    if (startDest != null) {
+        NavHost(
+            navController = navController,
+            startDestination = startDest!!
+        ) {
+            authGraph(navController)
+            mainGraph(navController)
+        }
     }
 }
