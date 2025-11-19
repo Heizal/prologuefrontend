@@ -5,7 +5,6 @@ import com.example.prologuefrontend.network.auth.dto.AuthResponse
 import com.example.prologuefrontend.network.auth.dto.LoginRequest
 import com.example.prologuefrontend.network.auth.dto.SignupRequest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,8 +13,8 @@ class AuthRepository @Inject constructor(
     private val localDataSource: AuthLocalDataSource,
     private val api: AuthApi
 ) {
-    suspend fun signup(email: String, password: String): AuthResponse{
-        val res = api.signup(SignupRequest(email, password))
+    suspend fun signup(email: String, password: String, username: String,): AuthResponse{
+        val res = api.signup(SignupRequest(email, password, username))
         localDataSource.saveAuth(res.token, res.userId)
         return res
     }
@@ -28,8 +27,9 @@ class AuthRepository @Inject constructor(
 
     fun getToken() = localDataSource.getToken()
 
-    fun isLoggedIn(): Boolean {
-        return runBlocking { localDataSource.getToken().first() != null }
+    suspend fun isLoggedIn(): Boolean {
+        val token = localDataSource.getToken().first()
+        return token != null
     }
 
     suspend fun logout() = localDataSource.clear()

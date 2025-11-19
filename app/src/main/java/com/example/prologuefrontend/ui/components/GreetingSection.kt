@@ -1,6 +1,5 @@
 package com.example.prologuefrontend.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +18,7 @@ fun GreetingSection(username: String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Good morning $username",
+            text = "Welcome back $username",
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold
             ),

@@ -49,8 +49,7 @@ fun CurrentReadingCard(book: Book){
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(300.dp)
-            .height(140.dp)
-            .padding(horizontal = 8.dp),
+            .height(140.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
 
     ){

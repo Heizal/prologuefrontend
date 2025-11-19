@@ -19,17 +19,7 @@ data class RecommendationBookDto(
     val description: String
 )
 
-//WHAT THE BACKEND RETURN
 data class RecommendationResponse(
     val message: String,
     val recommendations: List<RecommendationBookDto>
-)
-
-data class AddBookRequest(
-    val bookId: String
-)
-
-data class AddBookResponse(
-    val status: String,
-    val bookId: String
 )

@@ -1,7 +1,6 @@
 package com.example.prologuefrontend.ui.viewmodels
 
 import android.util.Log
-import android.util.Log.e
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -83,11 +82,11 @@ class DiscoverViewModel @Inject constructor(
                 try {
                     Log.d("DiscoverViewModel", "📚 Sending book to backend: ${book.title}")
                     val newBook = Book(
-                        id = book.id,
+                        id = null,
                         title = book.title,
                         author = book.author,
                         thumbnailUrl = book.thumbnailUrl,
-                        progress = 0f
+                        progress = 0
                     )
 
                     repo.addBookToLibrary(newBook)
@@ -137,5 +136,4 @@ class DiscoverViewModel @Inject constructor(
     fun loadConversation(id: String) {
         startNewChat()
     }
-
 }

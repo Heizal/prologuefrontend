@@ -1,10 +1,9 @@
 package com.example.prologuefrontend.data.remote
 
-import com.example.prologuefrontend.data.model.AddBookRequest
-import com.example.prologuefrontend.data.model.AddBookResponse
 import com.example.prologuefrontend.data.model.Book
 import com.example.prologuefrontend.data.model.RecommendationRequest
 import com.example.prologuefrontend.data.model.RecommendationResponse
+import com.example.prologuefrontend.data.model.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -37,4 +36,9 @@ interface ApiService {
 
     @DELETE("books/{id}")
     suspend fun deleteBook(@Path("id") id: Long)
+
+    @GET("users/me")
+    suspend fun getMe(): UserResponse
+
+
 }

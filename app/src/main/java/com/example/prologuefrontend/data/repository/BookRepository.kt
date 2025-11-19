@@ -25,24 +25,15 @@ class BookRepository  @Inject constructor(
         return api.getBooks(query)
     }
 
-    suspend fun addBook(book: Book): Book {
-        return api.addBook(book)
-    }
-
     suspend fun deleteBook(id: Long) {
         api.deleteBook(id)
     }
 
-    suspend fun updateBook(id: Long, book: Book): Book {
-        return api.updateBook(id, book)
-    }
-
     suspend fun uploadBook(fileUri: Uri, cacheDir: File): Book = withContext(Dispatchers.IO) {
-        val context = appContext // we’ll inject this below
+        val context = appContext
         val inputStream = context.contentResolver.openInputStream(fileUri)
             ?: throw IllegalArgumentException("Cannot open input stream for URI: $fileUri")
 
-        // create a temp file in cache directory
         val tempFile = File(cacheDir, "upload_${System.currentTimeMillis()}.pdf")
         tempFile.outputStream().use { output ->
             inputStream.copyTo(output)

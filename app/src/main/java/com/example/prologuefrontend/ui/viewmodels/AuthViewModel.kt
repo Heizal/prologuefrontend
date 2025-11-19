@@ -1,6 +1,5 @@
 package com.example.prologuefrontend.ui.viewmodels
 
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.prologuefrontend.data.AuthRepository
@@ -34,11 +33,11 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signup(email: String, password: String) {
+    fun signup(username: String, email: String, password: String) {
         viewModelScope.launch {
             try {
                 _authState.value = AuthState.Loading
-                repository.signup(email, password)
+                repository.signup(username, email, password)
                 _authState.value = AuthState.Success
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Unknown error")
@@ -48,6 +47,13 @@ class AuthViewModel @Inject constructor(
 
     fun reset() {
         _authState.value = AuthState.Idle
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            repository.logout()
+            _authState.value = AuthState.Idle
+        }
     }
 
 }

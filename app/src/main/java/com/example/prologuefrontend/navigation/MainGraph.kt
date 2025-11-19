@@ -3,17 +3,24 @@ package com.example.prologuefrontend.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import androidx.navigation.compose.rememberNavController
 import com.example.prologuefrontend.ui.components.BottomNavBar
 import com.example.prologuefrontend.ui.screens.DiscoverScreen
 import com.example.prologuefrontend.ui.screens.HomeScreen
 import com.example.prologuefrontend.ui.screens.MyBooksScreen
+import com.example.prologuefrontend.ui.screens.ProfileScreen
+import com.example.prologuefrontend.ui.viewmodels.AuthViewModel
+import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
+import com.example.prologuefrontend.ui.viewmodels.HomeViewModel
+import com.example.prologuefrontend.ui.viewmodels.UserViewModel
 
 fun NavGraphBuilder.mainGraph(navController: NavHostController) {
 
@@ -21,8 +28,18 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
         startDestination = "home",
         route = "main"
     ) {
-        composable("home") {
-            MainScreenContainer(navController) { HomeScreen(navController) }
+        composable("home") { backStackEntry ->
+            val userViewModel: UserViewModel = hiltViewModel(backStackEntry)
+            LaunchedEffect(Unit) {
+                userViewModel.loadUser()
+            }
+
+            MainScreenContainer(navController) {
+                HomeScreen(
+                    navController = navController,
+                    userViewModel = userViewModel
+                )
+            }
         }
 
         composable("discover") {
@@ -31,6 +48,29 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
 
         composable("myBooks") {
             MainScreenContainer(navController) { MyBooksScreen() }
+        }
+
+        composable("profile") { backStackEntry ->
+            val userViewModel: UserViewModel = hiltViewModel(backStackEntry)
+            val authViewModel: AuthViewModel = hiltViewModel(backStackEntry)
+            val userState by userViewModel.user.collectAsState()
+            val homeViewModel: HomeViewModel = hiltViewModel(backStackEntry)
+            val discoverViewModel: DiscoverViewModel = hiltViewModel(backStackEntry)
+
+            MainScreenContainer(navController) {
+                ProfileScreen(
+                    username = userState?.username ?: "Reader",
+                    onLogoutClick = {
+                        authViewModel.logout()
+                        userViewModel.clear()
+                        homeViewModel.clear()
+                        discoverViewModel.startNewChat()
+                        navController.navigate("auth") {
+                            popUpTo("main") { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }

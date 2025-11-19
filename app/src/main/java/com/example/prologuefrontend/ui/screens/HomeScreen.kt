@@ -4,71 +4,98 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.prologuefrontend.data.model.Book
 import com.example.prologuefrontend.ui.components.AIPicksSection
-import com.example.prologuefrontend.ui.components.BottomNavBar
 import com.example.prologuefrontend.ui.components.CurrentReadingCard
 import com.example.prologuefrontend.ui.components.GreetingSection
+import com.example.prologuefrontend.ui.components.NewUserAIPicksCard
+import com.example.prologuefrontend.ui.components.NewUserCurrentlyReadingCard
 import com.example.prologuefrontend.ui.components.RecentActivitySection
 import com.example.prologuefrontend.ui.components.RediscoverSection
 import com.example.prologuefrontend.ui.viewmodels.HomeViewModel
+import com.example.prologuefrontend.ui.viewmodels.UserViewModel
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HomeScreen(
     navController: NavHostController,
+    userViewModel: UserViewModel
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val books by homeViewModel.books.collectAsState()
+    val user by userViewModel.user.collectAsState()
 
-    // ✅ Removed Scaffold — NavGraph’s Scaffold already wraps this
+    val username = user?.username ?: "Reader"
+
+    HomeScreenContent(
+        username = username,
+        books = books,
+        navController = navController
+    )
+}
+
+@Composable
+private fun HomeScreenContent(
+    username: String,
+    books: List<Book>,
+    navController: NavHostController
+) {
+    val isNewUser = books.isEmpty()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { GreetingSection(username = "Heizal") }
+        item { GreetingSection(username) }
 
-        if (books.isNotEmpty()) {
+        if (isNewUser) {
             item {
-                Text(
-                    text = "Currently Reading",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                NewUserCurrentlyReadingCard(
+                    onStartReadingClick = { navController.navigate("myBooks") }
                 )
-                Spacer(Modifier.height(8.dp))
+            }
+
+            item {
+                NewUserAIPicksCard(
+                    onDiscoverClick = { navController.navigate("discover") }
+                )
+            }
+            item { Spacer(Modifier.height(80.dp)) }
+
+        } else {
+            item {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(books) { book ->
                         CurrentReadingCard(book = book)
                     }
                 }
             }
+            item { AIPicksSection() }
+            item { RediscoverSection() }
+            item { RecentActivitySection() }
+            item { Spacer(Modifier.height(80.dp)) }
         }
-
-        item { AIPicksSection() }
-        item { RediscoverSection() }
-        item { RecentActivitySection() }
-        item { Spacer(Modifier.height(80.dp)) } // space above nav bar
     }
 }
+
+

@@ -7,10 +7,10 @@ enum class ReadingState {
 }
 
 data class Book(
-    val id: String? = null,
+    val id: Long? = null,
     val title: String,
     val author: String,
-    val thumbnailUrl: String,
-    val progress: Float,
+    val thumbnailUrl: String? = null,
+    val progress: Int = 0,
     val readingState: ReadingState = ReadingState.WANT_TO_READ
 )

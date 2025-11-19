@@ -25,4 +25,8 @@ class HomeViewModel @Inject constructor(
             _books.value = repository.getBooks()
         }
     }
+
+    fun clear() {
+        _books.value = emptyList()
+    }
 }

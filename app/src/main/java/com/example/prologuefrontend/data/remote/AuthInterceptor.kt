@@ -1,6 +1,7 @@
 package com.example.prologuefrontend.data.remote
 
 import com.example.prologuefrontend.data.AuthLocalDataSource
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -18,9 +19,7 @@ class AuthInterceptor @Inject constructor(
         }
 
         val token = runBlocking {
-            var value: String? = null
-            authLocalDataSource.getToken().collect { value = it }
-            value
+            authLocalDataSource.getToken().first()
         }
 
         val newReq = if (token != null) {
@@ -29,7 +28,14 @@ class AuthInterceptor @Inject constructor(
                 .build()
         } else request
 
-        return chain.proceed(newReq)
+        val response = chain.proceed(newReq)
+
+        // If token is expired → backend sends 401 or 403 → clear token
+        if (response.code == 401 || response.code == 403) {
+            runBlocking { authLocalDataSource.clear() }
+        }
+
+        return response
     }
 
 }

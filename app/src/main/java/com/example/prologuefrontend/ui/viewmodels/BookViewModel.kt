@@ -38,9 +38,4 @@ class BookViewModel @Inject constructor(
 
         }
     }
-
-
-
-
-
 }
