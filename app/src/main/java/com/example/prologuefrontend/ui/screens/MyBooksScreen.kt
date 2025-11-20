@@ -108,7 +108,6 @@ fun MyBooksSearchBarWithAddButton(
     onSearch: (String) -> Unit,
     onUploadClick: () -> Unit
 ) {
-    var active by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -119,8 +118,8 @@ fun MyBooksSearchBarWithAddButton(
             query = query,
             onQueryChange = onQueryChange,
             onSearch = onSearch,
-            active = active,
-            onActiveChange = { active = it },
+            active = false,
+            onActiveChange = { },
             placeholder = { Text("Search your library...") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
