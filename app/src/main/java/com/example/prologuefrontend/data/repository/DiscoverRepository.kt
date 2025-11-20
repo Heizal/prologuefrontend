@@ -12,7 +12,7 @@ class DiscoverRepository @Inject constructor(
     private val api: ApiService
 ) {
     suspend fun fetchRecommendations(prompt: String): RecommendationResponse{
-        return api.getRecommendations(RecommendationRequest(prompt))
+        return api.getRecommendations(RecommendationRequest(prompt.trim()))
     }
 
     suspend fun addBookToLibrary(book: Book): Book {

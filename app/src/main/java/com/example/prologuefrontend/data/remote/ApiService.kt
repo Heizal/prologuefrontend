@@ -1,8 +1,11 @@
 package com.example.prologuefrontend.data.remote
 
 import com.example.prologuefrontend.data.model.Book
+import com.example.prologuefrontend.data.model.HomePickResponse
+import com.example.prologuefrontend.data.model.RecentActivityResponse
 import com.example.prologuefrontend.data.model.RecommendationRequest
 import com.example.prologuefrontend.data.model.RecommendationResponse
+import com.example.prologuefrontend.data.model.RediscoverResponse
 import com.example.prologuefrontend.data.model.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.http.Body
@@ -39,6 +42,21 @@ interface ApiService {
 
     @GET("users/me")
     suspend fun getMe(): UserResponse
+
+    @GET("/api/recommendations/home")
+    suspend fun getHomePick(
+        @Query("userId") userId: Long
+    ): HomePickResponse
+
+    @GET("/api/books/rediscover")
+    suspend fun rediscover(
+        @Query("userId") userId: Long
+    ): RediscoverResponse
+
+    @GET("/api/activity/recent")
+    suspend fun getRecentActivity(
+        @Query("userId") userId: Long
+    ): RecentActivityResponse
 
 
 }

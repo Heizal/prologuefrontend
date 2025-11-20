@@ -1,5 +1,6 @@
 package com.example.prologuefrontend.ui.screens
 
+import AIPicksSection
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.prologuefrontend.data.model.Book
-import com.example.prologuefrontend.ui.components.AIPicksSection
+import com.example.prologuefrontend.data.model.HomeUiState
 import com.example.prologuefrontend.ui.components.CurrentReadingCard
 import com.example.prologuefrontend.ui.components.GreetingSection
 import com.example.prologuefrontend.ui.components.NewUserAIPicksCard
@@ -37,6 +38,7 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val books by homeViewModel.books.collectAsState()
+    val homeState by homeViewModel.uiState.collectAsState()
     val user by userViewModel.user.collectAsState()
 
     val username = user?.username ?: "Reader"
@@ -44,7 +46,8 @@ fun HomeScreen(
     HomeScreenContent(
         username = username,
         books = books,
-        navController = navController
+        navController = navController,
+        homeState = homeState
     )
 }
 
@@ -52,7 +55,8 @@ fun HomeScreen(
 private fun HomeScreenContent(
     username: String,
     books: List<Book>,
-    navController: NavHostController
+    navController: NavHostController,
+    homeState: HomeUiState
 ) {
     val isNewUser = books.isEmpty()
 
@@ -90,7 +94,7 @@ private fun HomeScreenContent(
                     }
                 }
             }
-            item { AIPicksSection() }
+            item { AIPicksSection(uiState = homeState.aiPick) }
             item { RediscoverSection() }
             item { RecentActivitySection() }
             item { Spacer(Modifier.height(80.dp)) }

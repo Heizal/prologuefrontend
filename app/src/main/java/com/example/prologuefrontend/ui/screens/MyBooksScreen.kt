@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -69,6 +71,7 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         MyBooksSearchBarWithAddButton(
             query = query,
@@ -89,7 +92,7 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
                 books = books.filter { it.readingState == ReadingState.CURRENTLY_READING}
             )
             Spacer(modifier = Modifier.height(12.dp))
-            BookSection(
+            VerticalBookSection(
                 title = "Want to Read",
                 books = books.filter { it.readingState == ReadingState.WANT_TO_READ }
             )
@@ -177,12 +180,6 @@ fun BookSection(title: String, books: List<Book>) {
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Text(
-                text = "More",
-                color = Color(0xFF4D884F),
-                style= MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
         }
 
         LazyRow(
@@ -190,7 +187,7 @@ fun BookSection(title: String, books: List<Book>) {
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             items(books.size) { index ->
-                BookCard(books[index])
+                BookCard(books[index], modifier = Modifier.width(200.dp))
             }
         }
     }
@@ -198,21 +195,22 @@ fun BookSection(title: String, books: List<Book>) {
 
 
 @Composable
-fun BookCard(book: Book) {
+fun BookCard(
+    book: Book,
+    modifier: Modifier = Modifier
+) {
     val painter = rememberAsyncImagePainter(
         placeholder = painterResource(R.drawable.default_cover),
         model = book.thumbnailUrl ?: R.drawable.default_cover,
         error = painterResource(R.drawable.default_cover)
     )
     Card(
-        modifier = Modifier
-            .width(200.dp)
+        modifier = modifier
             .padding(4.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-        ) {
+        Column {
             Image(
                 painter = painter,
                 contentDescription = book.title,
@@ -245,3 +243,44 @@ fun BookCard(book: Book) {
         }
     }
 }
+
+@Composable
+fun VerticalBookSection(title: String, books: List<Book>) {
+    if (books.isEmpty()) return
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        }
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            books.chunked(2).forEach { rowBooks ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rowBooks.forEach { book ->
+                        BookCard(book = book, modifier = Modifier.weight(1f))
+                    }
+                    if (rowBooks.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+}
+
+

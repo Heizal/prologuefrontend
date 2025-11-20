@@ -1,75 +1,150 @@
-package com.example.prologuefrontend.ui.components
-
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.prologuefrontend.ui.viewmodels.DiscoverUiState
-import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
-
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.example.prologuefrontend.R
+import com.example.prologuefrontend.data.model.HomePickUiState
 
 @Composable
-fun AIPicksSection(viewModel: DiscoverViewModel = hiltViewModel()) {
-    val state by viewModel.uiState.collectAsState()
-
-    Column {
+fun AIPicksSection(
+    uiState: HomePickUiState,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Section Header
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("AI picks for You", fontWeight = FontWeight.Bold)
-            Text("More", color = Color.Gray)
+            Text(
+                text = "AI picks for You",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MaterialTheme.typography.titleMedium.fontFamily
+                )
+            )
+            Text(
+                text = "More",
+                style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
+            )
         }
-        Spacer(Modifier.height(8.dp))
-        when (state){
-            is DiscoverUiState.Loading ->{
-                Text("Loading...", color = Color.Gray)
-            }
-            is DiscoverUiState.Error ->{
-                Text("Error loading AI picks", color = Color.Red)
-            }
 
-            is DiscoverUiState.Chat    -> {
-                Text(
-                    "Chat in progress... go to Discover to continue your conversation.",
-                    color = Color.Gray
-                )
-            }
-            DiscoverUiState.Initial    -> {
-                Text(
-                    "No AI picks yet. Start a chat on the Discover tab to get recommendations!",
-                    color = Color.Gray
-                )
-            }
-            is DiscoverUiState.Recommendations -> {
-                val recs = (state as DiscoverUiState.Recommendations).books
-                if (recs.isEmpty()) {
-                    Text("No recommendations right now.", color = Color.Gray)
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        recs.take(3).forEach { book ->
-                            Text(
-                                text = "• ${book.title} by ${book.author}",
-                                color = Color.Black
-                            )
-                        }
-                    }
-                }
-            }
+        if (uiState.isLoading) {
+            Text("Asking the AI for a recommendation...", fontStyle = FontStyle.Italic)
+        } else if (uiState.error != null) {
+            Text("Could not load recommendation.", color = Color.Red)
+        } else {
+            AIPickCard(
+                title = uiState.title ?: "Unknown Title",
+                author = uiState.author ?: "Unknown Author",
+                thumbnailUrl = uiState.thumbnailUrl,
+                aiMessage = uiState.message ?: "I think you'll enjoy this read!"
+            )
         }
     }
 }
 
+@Composable
+fun AIPickCard(
+    title: String,
+    author: String,
+    thumbnailUrl: String?,
+    aiMessage: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF8F4FF)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // 1. Book Cover Image
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = "Book cover for $title",
+                placeholder = painterResource(id = R.drawable.default_cover),
+                error = painterResource(id = R.drawable.default_cover_error),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .width(110.dp)
+                    .fillMaxHeight()
+                    .background(Color.Gray)
+            )
 
+            // 2. Content Column
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                // Title
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                // Author
+                Text(
+                    text = "By $author",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = Color.Gray
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = aiMessage,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontStyle = FontStyle.Italic,
+                        lineHeight = 16.sp
+                    ),
+                    maxLines = 5,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}

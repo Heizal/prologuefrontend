@@ -30,8 +30,8 @@ class AuthInterceptor @Inject constructor(
 
         val response = chain.proceed(newReq)
 
-        // If token is expired → backend sends 401 or 403 → clear token
-        if (response.code == 401 || response.code == 403) {
+        if (response.code == 401 || response.code == 403
+            && request.url.encodedPath.startsWith("/auth")) {
             runBlocking { authLocalDataSource.clear() }
         }
 

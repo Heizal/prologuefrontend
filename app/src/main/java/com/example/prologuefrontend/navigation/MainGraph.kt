@@ -19,7 +19,6 @@ import com.example.prologuefrontend.ui.screens.MyBooksScreen
 import com.example.prologuefrontend.ui.screens.ProfileScreen
 import com.example.prologuefrontend.ui.viewmodels.AuthViewModel
 import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
-import com.example.prologuefrontend.ui.viewmodels.HomeViewModel
 import com.example.prologuefrontend.ui.viewmodels.UserViewModel
 
 fun NavGraphBuilder.mainGraph(navController: NavHostController) {
@@ -54,7 +53,6 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
             val userViewModel: UserViewModel = hiltViewModel(backStackEntry)
             val authViewModel: AuthViewModel = hiltViewModel(backStackEntry)
             val userState by userViewModel.user.collectAsState()
-            val homeViewModel: HomeViewModel = hiltViewModel(backStackEntry)
             val discoverViewModel: DiscoverViewModel = hiltViewModel(backStackEntry)
 
             MainScreenContainer(navController) {
@@ -63,7 +61,6 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
                     onLogoutClick = {
                         authViewModel.logout()
                         userViewModel.clear()
-                        homeViewModel.clear()
                         discoverViewModel.startNewChat()
                         navController.navigate("auth") {
                             popUpTo("main") { inclusive = true }
