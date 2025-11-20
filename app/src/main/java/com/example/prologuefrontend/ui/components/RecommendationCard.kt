@@ -63,7 +63,6 @@ fun RecommendationCard(
             ) {
                 Log.d("ThumbnailCheck", "Thumbnail URL: ${book.thumbnailUrl}")
 
-                // ✅ Force Coil to actually draw with proper scaling
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(book.thumbnailUrl)
@@ -74,7 +73,7 @@ fun RecommendationCard(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(RoundedCornerShape(10.dp)),
-                    contentScale = ContentScale.Crop // ✅ ensures image fits box
+                    contentScale = ContentScale.Crop
                 )
 
                 Column(
@@ -112,13 +111,12 @@ fun RecommendationCard(
 
             Spacer(Modifier.height(10.dp))
 
-            // ✅ Limit description properly
             if (!book.description.isNullOrBlank()) {
                 Text(
                     text = book.description
                         .split("\n")
                         .firstOrNull()
-                        ?.take(400) // cap long single paragraphs
+                        ?.take(400)
                         ?.plus("...")
                         ?: "",
                     style = MaterialTheme.typography.bodyMedium,

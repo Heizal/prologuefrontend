@@ -13,6 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.prologuefrontend.ui.components.BottomNavBar
+import com.example.prologuefrontend.ui.screens.ChatDetailScreen
 import com.example.prologuefrontend.ui.screens.DiscoverScreen
 import com.example.prologuefrontend.ui.screens.HomeScreen
 import com.example.prologuefrontend.ui.screens.MyBooksScreen
@@ -42,7 +43,11 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
         }
 
         composable("discover") {
-            MainScreenContainer(navController) { DiscoverScreen() }
+            MainScreenContainer(navController) { DiscoverScreen(
+                onChatSelected = { chatId ->
+                    navController.navigate("chatDetail/$chatId")
+                }
+            ) }
         }
 
         composable("myBooks") {
@@ -68,6 +73,21 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
                     }
                 )
             }
+        }
+
+        composable("chatDetail/{chatId}") { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId")!!
+            ChatDetailScreen(
+                chatId = chatId,
+                onChatSelected = { newChatId ->
+                    navController.navigate("chatDetail/$newChatId") {
+                        popUpTo("chatDetail/{chatId}") { inclusive = true }
+                    }
+                },
+                onAskAgain = { prompt ->
+                    navController.navigate("discover?prompt=$prompt")
+                }
+            )
         }
     }
 }

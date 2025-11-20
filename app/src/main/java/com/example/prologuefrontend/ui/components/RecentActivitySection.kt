@@ -45,11 +45,11 @@ fun RecentActivitySection(homeViewModel: HomeViewModel = hiltViewModel()) {
                     Column(Modifier.padding(16.dp)) {
 
                         state.lastBookTitle?.let {
-                            Text("📖 You’re currently reading $it")
+                            Text("📖 You’re currently reading: $it")
                         }
 
                         state.lastAIPick?.let {
-                            Text("📚 Prologue recommended $it")
+                            Text("📚 Prologue recommended: $it")
                         }
                     }
                 }

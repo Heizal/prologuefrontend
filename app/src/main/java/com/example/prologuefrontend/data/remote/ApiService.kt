@@ -1,6 +1,8 @@
 package com.example.prologuefrontend.data.remote
 
 import com.example.prologuefrontend.data.model.Book
+import com.example.prologuefrontend.data.model.ChatDetail
+import com.example.prologuefrontend.data.model.ChatPreview
 import com.example.prologuefrontend.data.model.HomePickResponse
 import com.example.prologuefrontend.data.model.RecentActivityResponse
 import com.example.prologuefrontend.data.model.RecommendationRequest
@@ -57,6 +59,14 @@ interface ApiService {
     suspend fun getRecentActivity(
         @Query("userId") userId: Long
     ): RecentActivityResponse
+
+    @GET("api/chats")
+    suspend fun getChatPreviews(): List<ChatPreview>
+
+    @GET("api/chats/{chatId}")
+    suspend fun getChatDetail(
+        @Path("chatId") chatId: String
+    ): ChatDetail
 
 
 }

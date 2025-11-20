@@ -23,3 +23,17 @@ data class RecommendationResponse(
     val message: String,
     val recommendations: List<RecommendationBookDto>
 )
+
+data class ChatPreview(
+    val chatId: String,
+    val previewTitle: String,
+    val timestamp: String,
+    val topBookCoverUrl: String?
+)
+
+data class ChatDetail(
+    val chatId: String,
+    val userMessage: String,
+    val modelResponse: String,
+    val recommendations: List<RecommendationBookDto>
+)

@@ -21,10 +21,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
@@ -33,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,7 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,19 +59,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.prologuefrontend.R
+import com.example.prologuefrontend.ui.components.PastChatsDrawer
 import com.example.prologuefrontend.ui.components.QuickPromptChip
 import com.example.prologuefrontend.ui.components.RecommendationCard
 import com.example.prologuefrontend.ui.viewmodels.DiscoverUiState
 import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
 import kotlinx.coroutines.launch
 
-
 val EBGaramond = FontFamily(Font(R.font.eb_garamond_regular))
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscoverScreen(vm: DiscoverViewModel = hiltViewModel()) {
-    val state by vm.uiState.collectAsState()
+fun DiscoverScreen(
+    vm: DiscoverViewModel = hiltViewModel(),
+    onChatSelected: (String) -> Unit
+) {
+    val state by vm.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        vm.loadChatPreviews()
+    }
+
     var input by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -83,13 +91,27 @@ fun DiscoverScreen(vm: DiscoverViewModel = hiltViewModel()) {
         drawerState = drawerState,
         drawerContent = {
             PastChatsDrawer(
-                onNew = { vm.startNewChat() },
-                onSelect = { id -> vm.loadConversation(id); scope.launch { drawerState.close() } }
+                previews = state.chatPreviews,
+                isLoading = state.isChatPreviewsLoading,
+                error = state.chatPreviewsError,
+                onNew = {
+                    vm.startNewChat()
+                    scope.launch { drawerState.close() }
+                },
+                onSelect = { id ->
+                    onChatSelected(id)
+                    scope.launch { drawerState.close() }
+                }
             )
         }
     ) {
         Scaffold(
-            topBar = { DiscoverTopBar(onNewChatClick = { vm.startNewChat() }) },
+            topBar = {
+                DiscoverTopBar(
+                    onNewChatClick = { vm.startNewChat() },
+                    onMenuClick = { scope.launch { drawerState.open() } }
+                )
+            },
             containerColor = Color.White
         ) { innerPadding ->
 
@@ -100,7 +122,8 @@ fun DiscoverScreen(vm: DiscoverViewModel = hiltViewModel()) {
                     .background(Color.White)
             ) {
                 DiscoverContent(state = state, vm = vm, listState = listState)
-                if (state == DiscoverUiState.Initial) {
+
+                if (state is DiscoverUiState.Initial) {
                     DiscoverInputBar(
                         value = input,
                         onValueChange = { input = it },
@@ -122,7 +145,7 @@ fun DiscoverScreen(vm: DiscoverViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DiscoverTopBar(onNewChatClick: () -> Unit) {
+private fun DiscoverTopBar(onNewChatClick: () -> Unit, onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -130,16 +153,21 @@ private fun DiscoverTopBar(onNewChatClick: () -> Unit) {
                     "Prologue",
                     fontFamily = EBGaramond,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp, // Larger font size
+                    fontSize = 26.sp,
                     color = Color.Black
                 )
                 Text(
                     ".",
                     fontFamily = EBGaramond,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp, // Larger font size
+                    fontSize = 26.sp,
                     color = Color(0xFF4D884F)
                 )
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onMenuClick) {
+                Icon(Icons.Default.Menu, contentDescription = "History", tint = Color.Black)
             }
         },
         actions = {
@@ -161,9 +189,10 @@ private fun DiscoverTopBar(onNewChatClick: () -> Unit) {
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White
         ),
-        modifier = Modifier.padding(horizontal = 4.dp) // Use padding on the modifier
+        modifier = Modifier.padding(horizontal = 4.dp)
     )
 }
+
 @Composable
 private fun DiscoverContent(
     state: DiscoverUiState,
@@ -171,7 +200,7 @@ private fun DiscoverContent(
     listState: androidx.compose.foundation.lazy.LazyListState
 ) {
     when (state) {
-        DiscoverUiState.Initial -> {
+        is DiscoverUiState.Initial -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -183,7 +212,7 @@ private fun DiscoverContent(
                 )
             }
         }
-        else -> {
+        is DiscoverUiState.Recommendations -> {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -191,54 +220,59 @@ private fun DiscoverContent(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                when (state) {
-                    is DiscoverUiState.Recommendations -> {
-                        val rec = state
-                        item {
-                            vm.lastUserPrompt?.let {
-                                UserBubble(it)
-                                Spacer(Modifier.height(8.dp))
-                            }
-
-                            Text(
-                                rec.assistantMessage,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Black
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    "Perfect for you Right Now",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                TextButton(onClick = vm::askAgain) {
-                                    Text("Ask Again", color = Color(0xFF4D884F))
-                                }
-                            }
-                            Divider()
-                        }
-                        items(rec.books) { book ->
-                            RecommendationCard(
-                                book = book,
-                                rec.inLibrary.contains(book.title),
-                                onAddClick = { vm.addBook(it) }
-                            )
-                        }
+                item {
+                    vm.lastUserPrompt?.let {
+                        UserBubble(it)
+                        Spacer(Modifier.height(8.dp))
                     }
 
-                    DiscoverUiState.Loading -> item { CenterLoading() }
-                    is DiscoverUiState.Error -> item { ErrorView(state.message) }
-                    else -> Unit
+                    Text(
+                        state.assistantMessage,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Perfect for you Right Now",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        TextButton(onClick = vm::askAgain) {
+                            Text("Ask Again", color = Color(0xFF4D884F))
+                        }
+                    }
+                    Divider()
                 }
+                items(state.books) { book ->
+                    RecommendationCard(
+                        book = book,
+                        isInLibrary = state.inLibrary.contains(book.id),
+                        onAddClick = { vm.addBook(it) }
+                    )
+                }
+                // Padding at bottom for navigation
+                item { Spacer(Modifier.height(80.dp)) }
+            }
+        }
+        is DiscoverUiState.Loading -> {
+            CenterLoading()
+        }
+        is DiscoverUiState.Error -> {
+            ErrorView(state.message)
+        }
+        is DiscoverUiState.Chat -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Conversation view not implemented yet")
             }
         }
     }
 }
+
 
 @Composable
 private fun InitialDiscoverLayout(onChip: (String) -> Unit, modifier: Modifier) {
@@ -265,7 +299,6 @@ private fun InitialDiscoverLayout(onChip: (String) -> Unit, modifier: Modifier) 
             fontFamily = EBGaramond
         )
         Spacer(Modifier.height(32.dp))
-        // Chips ABOVE the input bar
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -278,6 +311,7 @@ private fun InitialDiscoverLayout(onChip: (String) -> Unit, modifier: Modifier) 
         }
     }
 }
+
 @Composable
 private fun DiscoverInputBar(
     value: String,
@@ -285,7 +319,6 @@ private fun DiscoverInputBar(
     onSend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // A translucent scrim that can be tapped to send the message
     if (value.isNotBlank()) {
         Box(
             modifier = Modifier
@@ -298,7 +331,7 @@ private fun DiscoverInputBar(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = Color.White,
-        shadowElevation = 8.dp // Add a shadow to lift it off the content
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
@@ -306,7 +339,6 @@ private fun DiscoverInputBar(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Column for the "+" and "Ask me anything" text
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -317,7 +349,6 @@ private fun DiscoverInputBar(
                     color = Color.Gray
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // The actual input field is now a basic text field
                     BasicTextField(
                         value = value,
                         onValueChange = onValueChange,
@@ -358,26 +389,5 @@ private fun UserBubble(message: String) {
 @Composable private fun ErrorView(msg: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(msg, color = MaterialTheme.colorScheme.error)
-    }
-}
-
-@Composable
-private fun PastChatsDrawer(onNew: () -> Unit, onSelect: (String) -> Unit) {
-    Column(Modifier
-               .fillMaxSize()
-               .padding(16.dp)) {
-        Text("Conversations", fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        repeat(3) {
-            Text(
-                "Chat ${it + 1}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onSelect("chat_${it + 1}") }
-                    .padding(12.dp)
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        Button(onClick = onNew, modifier = Modifier.fillMaxWidth()) { Text("New Chat") }
     }
 }
