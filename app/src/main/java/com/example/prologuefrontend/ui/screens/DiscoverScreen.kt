@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
@@ -49,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -319,52 +322,56 @@ private fun DiscoverInputBar(
     onSend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (value.isNotBlank()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f))
-                .clickable { onSend() }
-        )
-    }
-
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = Color.White,
-        shadowElevation = 8.dp
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp))
+                .background(Color.White, shape = RoundedCornerShape(32.dp))
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    "Ask me anything",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Gray
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    BasicTextField(
-                        value = value,
-                        onValueChange = onValueChange,
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.Black),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 8.dp),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
-                        keyboardActions = KeyboardActions(onSend = { onSend() })
+            Box(modifier = Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    Text(
+                        text = "Ask me anything",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.LightGray
                     )
                 }
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.Black),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = { onSend() })
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            // The Send Button
+            IconButton(
+                onClick = onSend,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send",
+                    tint = Color(0xFF4D884F)
+                )
             }
         }
     }
 }
+
 
 @Composable
 private fun UserBubble(message: String) {

@@ -8,12 +8,14 @@ import com.example.prologuefrontend.data.model.RecentActivityResponse
 import com.example.prologuefrontend.data.model.RecommendationRequest
 import com.example.prologuefrontend.data.model.RecommendationResponse
 import com.example.prologuefrontend.data.model.RediscoverResponse
+import com.example.prologuefrontend.data.model.UpdateProfileRequest
 import com.example.prologuefrontend.data.model.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
@@ -44,6 +46,17 @@ interface ApiService {
 
     @GET("users/me")
     suspend fun getMe(): UserResponse
+
+    @PATCH("users/me")
+    suspend fun updateProfile(
+        @Body body: UpdateProfileRequest
+    ): UserResponse
+
+    @Multipart
+    @POST("users/me/avatar")
+    suspend fun uploadAvatar(
+        @Part file: MultipartBody.Part
+    ): UserResponse
 
     @GET("/api/recommendations/home")
     suspend fun getHomePick(

@@ -63,6 +63,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences-core:1.1.7")
     implementation("androidx.datastore:datastore:1.1.7")
     implementation("androidx.datastore:datastore-core:1.1.7")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

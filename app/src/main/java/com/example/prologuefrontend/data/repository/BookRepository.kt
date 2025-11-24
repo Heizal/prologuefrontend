@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.annotation.UiContext
 import com.example.prologuefrontend.data.model.Book
+import com.example.prologuefrontend.data.model.ProfileStats
+import com.example.prologuefrontend.data.model.ReadingState
 import com.example.prologuefrontend.data.remote.ApiService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -42,5 +44,15 @@ class BookRepository  @Inject constructor(
         val requestFile = tempFile.asRequestBody("multipart/form-data".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
         api.uploadBook(body)
+    }
+
+    suspend fun getProfileStats(): ProfileStats {
+        val books = getBooks()
+
+        return ProfileStats(
+            booksRead = books.count { it.readingState == ReadingState.COMPLETED },
+            currentlyReading = books.count { it.readingState == ReadingState.CURRENTLY_READING },
+            wantToRead = books.count { it.readingState == ReadingState.WANT_TO_READ }
+        )
     }
 }

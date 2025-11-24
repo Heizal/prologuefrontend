@@ -20,6 +20,7 @@ import com.example.prologuefrontend.ui.screens.MyBooksScreen
 import com.example.prologuefrontend.ui.screens.ProfileScreen
 import com.example.prologuefrontend.ui.viewmodels.AuthViewModel
 import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
+import com.example.prologuefrontend.ui.viewmodels.ProfileViewModel
 import com.example.prologuefrontend.ui.viewmodels.UserViewModel
 
 fun NavGraphBuilder.mainGraph(navController: NavHostController) {
@@ -55,22 +56,20 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController) {
         }
 
         composable("profile") { backStackEntry ->
-            val userViewModel: UserViewModel = hiltViewModel(backStackEntry)
             val authViewModel: AuthViewModel = hiltViewModel(backStackEntry)
-            val userState by userViewModel.user.collectAsState()
             val discoverViewModel: DiscoverViewModel = hiltViewModel(backStackEntry)
+            val profileViewModel: ProfileViewModel = hiltViewModel(backStackEntry)
 
             MainScreenContainer(navController) {
                 ProfileScreen(
-                    username = userState?.username ?: "Reader",
                     onLogoutClick = {
                         authViewModel.logout()
-                        userViewModel.clear()
                         discoverViewModel.startNewChat()
                         navController.navigate("auth") {
                             popUpTo("main") { inclusive = true }
                         }
-                    }
+                    },
+                    viewModel = profileViewModel
                 )
             }
         }
