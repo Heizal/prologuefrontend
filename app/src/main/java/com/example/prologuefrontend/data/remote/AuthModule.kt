@@ -1,9 +1,9 @@
 package com.example.prologuefrontend.data.remote
 
 import android.content.Context
-import com.example.prologuefrontend.data.AuthLocalDataSource
-import com.example.prologuefrontend.data.AuthRepository
-import com.example.prologuefrontend.network.auth.AuthApi
+import com.example.prologuefrontend.data.local.AuthLocalDataSource
+import com.example.prologuefrontend.data.repository.AuthRepository
+import com.example.prologuefrontend.data.remote.AuthApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

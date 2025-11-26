@@ -3,7 +3,7 @@ package com.example.prologuefrontend.ui.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.prologuefrontend.data.AuthLocalDataSource
+import com.example.prologuefrontend.data.local.AuthLocalDataSource
 import com.example.prologuefrontend.data.model.Book
 import com.example.prologuefrontend.data.model.HomePickUiState
 import com.example.prologuefrontend.data.model.HomeUiState

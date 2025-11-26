@@ -1,4 +1,4 @@
-package com.example.prologuefrontend.data
+package com.example.prologuefrontend.data.local
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
