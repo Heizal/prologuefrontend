@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.prologuefrontend.data.model.DetailScreenState
 import com.example.prologuefrontend.data.model.RecommendationBookDto
 import com.example.prologuefrontend.ui.components.PastChatsDrawer
 import com.example.prologuefrontend.ui.viewmodels.ChatDetailViewModel
@@ -63,7 +64,7 @@ fun ChatDetailScreen(
     onAskAgain: (String) -> Unit = {},
     onChatSelected: (String) -> Unit,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.state.collectAsState()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -77,9 +78,9 @@ fun ChatDetailScreen(
         drawerState = drawerState,
         drawerContent = {
             PastChatsDrawer(
-                previews = state.chatPreviews,
-                isLoading = state.isPreviewsLoading,
-                error = state.previewsError,
+                previews = state.sidebar.previews,
+                isLoading = state.sidebar.isLoading,
+                error = state.sidebar.error,
                 onNew = {
                     onAskAgain("")
                     scope.launch { drawerState.close() }
@@ -104,22 +105,32 @@ fun ChatDetailScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                when {
-                    state.isLoading -> {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                when (val screen = state.screen) {
+
+                    is DetailScreenState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             CircularProgressIndicator(color = Color.Black)
                         }
                     }
 
-                    state.error != null -> {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(state.error!!, color = Color.Red)
+                    is DetailScreenState.Error -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = screen.message,
+                                color = Color.Red
+                            )
                         }
                     }
 
-                    state.chatDetail != null -> {
+                    is DetailScreenState.Loaded -> {
                         ChatDetailContent(
-                            detail = state.chatDetail!!,
+                            detail = screen.detail,
                             onAskAgain = onAskAgain
                         )
                     }
@@ -197,7 +208,7 @@ private fun ChatDetailContent(
                     text = detail.userMessage,
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFE6E0F8)) // Light purple from screenshot
+                        .background(Color(0xFFE6E0F8))
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     color = Color.Black,
                     style = MaterialTheme.typography.bodyMedium

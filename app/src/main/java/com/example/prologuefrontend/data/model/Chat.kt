@@ -37,3 +37,14 @@ data class ChatDetail(
     val modelResponse: String,
     val recommendations: List<RecommendationBookDto>
 )
+
+data class ChatDetailUiState(
+    val screen: DetailScreenState = DetailScreenState.Loading,
+    val sidebar: SidebarState = SidebarState()
+)
+
+sealed interface DetailScreenState {
+    object Loading : DetailScreenState
+    data class Error(val message: String) : DetailScreenState
+    data class Loaded(val detail: ChatDetail) : DetailScreenState
+}

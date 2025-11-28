@@ -17,8 +17,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.testng.annotations.AfterTest
-import org.testng.annotations.BeforeTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {

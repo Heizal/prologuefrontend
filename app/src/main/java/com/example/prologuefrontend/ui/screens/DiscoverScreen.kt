@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,10 +65,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.prologuefrontend.R
+import com.example.prologuefrontend.data.model.DiscoverUiState
+import com.example.prologuefrontend.data.model.ScreenState
 import com.example.prologuefrontend.ui.components.PastChatsDrawer
 import com.example.prologuefrontend.ui.components.QuickPromptChip
 import com.example.prologuefrontend.ui.components.RecommendationCard
-import com.example.prologuefrontend.ui.viewmodels.DiscoverUiState
 import com.example.prologuefrontend.ui.viewmodels.DiscoverViewModel
 import kotlinx.coroutines.launch
 
@@ -79,7 +81,7 @@ fun DiscoverScreen(
     vm: DiscoverViewModel = hiltViewModel(),
     onChatSelected: (String) -> Unit
 ) {
-    val state by vm.uiState.collectAsStateWithLifecycle()
+    val state by vm.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         vm.loadChatPreviews()
@@ -94,9 +96,9 @@ fun DiscoverScreen(
         drawerState = drawerState,
         drawerContent = {
             PastChatsDrawer(
-                previews = state.chatPreviews,
-                isLoading = state.isChatPreviewsLoading,
-                error = state.chatPreviewsError,
+                previews = state.sidebar.previews,
+                isLoading = state.sidebar.isLoading,
+                error = state.sidebar.error,
                 onNew = {
                     vm.startNewChat()
                     scope.launch { drawerState.close() }
@@ -124,9 +126,13 @@ fun DiscoverScreen(
                     .padding(innerPadding)
                     .background(Color.White)
             ) {
-                DiscoverContent(state = state, vm = vm, listState = listState)
+                DiscoverContent(
+                    screen = state.screen,
+                    vm = vm,
+                    listState = listState
+                )
 
-                if (state is DiscoverUiState.Initial) {
+                if (state.screen is ScreenState.Initial) {
                     DiscoverInputBar(
                         value = input,
                         onValueChange = { input = it },
@@ -198,12 +204,13 @@ private fun DiscoverTopBar(onNewChatClick: () -> Unit, onMenuClick: () -> Unit) 
 
 @Composable
 private fun DiscoverContent(
-    state: DiscoverUiState,
+    screen: ScreenState,
     vm: DiscoverViewModel,
-    listState: androidx.compose.foundation.lazy.LazyListState
+    listState: LazyListState
 ) {
-    when (state) {
-        is DiscoverUiState.Initial -> {
+    when (screen) {
+
+        is ScreenState.Initial -> {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -215,7 +222,16 @@ private fun DiscoverContent(
                 )
             }
         }
-        is DiscoverUiState.Recommendations -> {
+
+        is ScreenState.Loading -> {
+            CenterLoading()
+        }
+
+        is ScreenState.Error -> {
+            ErrorView(screen.message)
+        }
+
+        is ScreenState.Recommendations -> {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -223,18 +239,18 @@ private fun DiscoverContent(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
                 item {
-                    vm.lastUserPrompt?.let {
-                        UserBubble(it)
-                        Spacer(Modifier.height(8.dp))
-                    }
+                    UserBubble(screen.prompt)
+                    Spacer(Modifier.height(8.dp))
 
                     Text(
-                        state.assistantMessage,
+                        screen.responseMessage,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black
                     )
                     Spacer(Modifier.height(16.dp))
+
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -251,24 +267,20 @@ private fun DiscoverContent(
                     }
                     Divider()
                 }
-                items(state.books) { book ->
+
+                items(screen.books) { book ->
                     RecommendationCard(
                         book = book,
-                        isInLibrary = state.inLibrary.contains(book.id),
+                        isInLibrary = screen.inLibrary.contains(book.id),
                         onAddClick = { vm.addBook(it) }
                     )
                 }
-                // Padding at bottom for navigation
+
                 item { Spacer(Modifier.height(80.dp)) }
             }
         }
-        is DiscoverUiState.Loading -> {
-            CenterLoading()
-        }
-        is DiscoverUiState.Error -> {
-            ErrorView(state.message)
-        }
-        is DiscoverUiState.Chat -> {
+
+        is ScreenState.Chat -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Conversation view not implemented yet")
             }
@@ -310,7 +322,6 @@ private fun InitialDiscoverLayout(onChip: (String) -> Unit, modifier: Modifier) 
         ) {
             QuickPromptChip("I had a stressful day") { onChip("I had a stressful day") }
             QuickPromptChip("I want to explore other worlds") { onChip("I want to explore other worlds") }
-            QuickPromptChip("I feel uninspired") { onChip("I feel uninspired") }
         }
     }
 }
