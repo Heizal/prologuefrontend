@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,14 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,16 +47,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.rememberAsyncImagePainter
 import com.example.prologuefrontend.R
 import com.example.prologuefrontend.data.model.Book
+import com.example.prologuefrontend.data.model.MyBooksUiState
 import com.example.prologuefrontend.data.model.ReadingState
 import com.example.prologuefrontend.ui.viewmodels.MyBooksViewModel
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
-    val books by viewModel.books.collectAsState()
-    val query by viewModel.query.collectAsState()
-    val context = LocalContext.current
-    var active by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -67,6 +61,19 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
         uri?.let { viewModel.uploadBook(it) }
     }
 
+    // 2. Pass state and events to the stateless composable
+    MyBooksContent(
+        uiState = uiState,
+        onQueryChange = viewModel::onSearchQueryChange,
+        onUploadClick = { launcher.launch("*/*") }
+    )
+}
+@Composable
+fun MyBooksContent(
+    uiState: MyBooksUiState,
+    onQueryChange: (String) -> Unit,
+    onUploadClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,27 +81,49 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
             .verticalScroll(rememberScrollState())
     ) {
         MyBooksSearchBarWithAddButton(
-            query = query,
-            onQueryChange = viewModel::onSearchQueryChange,
-            onSearch = { viewModel.onSearchQueryChange(it) },
-            onUploadClick = { launcher.launch("*/*") }
+            query = uiState.query,
+            onQueryChange = onQueryChange,
+            onSearch = onQueryChange,
+            onUploadClick = onUploadClick
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (books.isEmpty()) {
-            EmptyLibrary(onUpload = {
-                launcher.launch("*/*")
-            })
+        // Handle Loading
+        if (uiState.isLoading && uiState.books.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+
+        // Handle Error
+        if (uiState.error != null && !uiState.isLoading) {
+            Text(
+                text = uiState.error,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        // Handle Content
+        if (uiState.books.isEmpty() && !uiState.isLoading && uiState.error == null) {
+            if (uiState.query.isNotEmpty()) {
+                Text(
+                    text = "No results found for '${uiState.query}'",
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                EmptyLibrary(onUpload = onUploadClick)
+            }
         } else {
             BookSection(
                 title = "Currently Reading",
-                books = books.filter { it.readingState == ReadingState.CURRENTLY_READING}
+                books = uiState.books.filter { it.readingState == ReadingState.CURRENTLY_READING }
             )
             Spacer(modifier = Modifier.height(12.dp))
             VerticalBookSection(
                 title = "Want to Read",
-                books = books.filter { it.readingState == ReadingState.WANT_TO_READ }
+                books = uiState.books.filter { it.readingState == ReadingState.WANT_TO_READ }
             )
         }
     }
@@ -108,7 +137,6 @@ fun MyBooksSearchBarWithAddButton(
     onSearch: (String) -> Unit,
     onUploadClick: () -> Unit
 ) {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -143,7 +171,6 @@ fun MyBooksSearchBarWithAddButton(
     }
 }
 
-
 @Composable
 fun EmptyLibrary(onUpload: () -> Unit) {
     Column(
@@ -175,7 +202,7 @@ fun BookSection(title: String, books: List<Book>) {
         ) {
             Text(
                 text = title,
-                style= MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
@@ -192,6 +219,44 @@ fun BookSection(title: String, books: List<Book>) {
     }
 }
 
+@Composable
+fun VerticalBookSection(title: String, books: List<Book>) {
+    if (books.isEmpty()) return
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        }
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            books.chunked(2).forEach { rowBooks ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rowBooks.forEach { book ->
+                        BookCard(book = book, modifier = Modifier.weight(1f))
+                    }
+                    if (rowBooks.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+}
 
 @Composable
 fun BookCard(
@@ -238,45 +303,6 @@ fun BookCard(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun VerticalBookSection(title: String, books: List<Book>) {
-    if (books.isEmpty()) return
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-        }
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            books.chunked(2).forEach { rowBooks ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    rowBooks.forEach { book ->
-                        BookCard(book = book, modifier = Modifier.weight(1f))
-                    }
-                    if (rowBooks.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }

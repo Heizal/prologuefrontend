@@ -36,7 +36,7 @@ import com.example.prologuefrontend.data.model.Book
 
 @Composable
 fun CurrentReadingCard(book: Book){
-    val backgroundColor = Color(0xFFE5E8EC) // soft gray like your default image background
+    val backgroundColor = Color(0xFFE5E8EC)
     val imagePainter = if (!book.thumbnailUrl.isNullOrBlank()) {
         rememberAsyncImagePainter(book.thumbnailUrl)
     } else {

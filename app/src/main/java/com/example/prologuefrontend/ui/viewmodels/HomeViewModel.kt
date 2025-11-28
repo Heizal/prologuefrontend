@@ -37,7 +37,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadBooks() {
         viewModelScope.launch {
-            _books.value = bookRepository.getBooks()
+            _books.value = bookRepository.getBooks().reversed()
         }
     }
 
