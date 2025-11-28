@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.prologuefrontend.ui.viewmodels.AuthState
 import com.example.prologuefrontend.ui.viewmodels.AuthViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun LoginScreen(

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.prologuefrontend.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,7 +20,7 @@ class AuthViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: MutableStateFlow<AuthState> = _authState
+    val authState: StateFlow<AuthState> = _authState
 
     fun login(email: String, password: String){
         viewModelScope.launch {
@@ -33,11 +34,11 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signup(username: String, email: String, password: String) {
+    fun signup(email: String, password: String, username: String) {
         viewModelScope.launch {
             try {
                 _authState.value = AuthState.Loading
-                repository.signup(username, email, password)
+                repository.signup(email, password, username)
                 _authState.value = AuthState.Success
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Unknown error")

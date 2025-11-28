@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.couroutines)
     implementation(libs.coil.compose)
+    testImplementation(libs.testng)
     kapt(libs.hilt.compiler)
     implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
@@ -90,4 +91,5 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    testImplementation(kotlin("test"))
 }
