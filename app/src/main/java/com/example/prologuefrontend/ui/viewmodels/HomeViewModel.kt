@@ -61,11 +61,8 @@ class HomeViewModel @Inject constructor(
             }
 
             if (userId == null) {
-                Log.e("HomeVM", "❌ userId still NULL after retry — aborting loadHomeData()")
                 return@launch
             }
-
-            Log.d("HomeVM", "✅ Loaded userId=$userId for Home API calls")
 
 
             // AI Pick
@@ -79,7 +76,7 @@ class HomeViewModel @Inject constructor(
                         title = ai.title,
                         author = ai.author,
                         thumbnailUrl = ai.thumbnailUrl,
-                        message = ai.message
+                        message = ai.message,
                     )
                 )
             } catch (e: Exception) {
@@ -97,7 +94,8 @@ class HomeViewModel @Inject constructor(
                     rediscover = RediscoverUiState(
                         title = red.title,
                         author = red.author,
-                        thumbnailUrl = red.thumbnailUrl
+                        thumbnailUrl = red.thumbnailUrl,
+                        infoLink = red.infoLink
                     )
                 )
             } catch (e: Exception) {
@@ -117,6 +115,8 @@ class HomeViewModel @Inject constructor(
                         lastBookAuthor = act.latestBook?.author,
                         lastAIPick = act.latestRecommendation?.title,
                         lastAIPickAuthor = act.latestRecommendation?.author,
+                        lastBookInfoLink = act.latestBook?.infoLink,
+                        lastAIPickInfoLink = act.latestRecommendation?.infoLink,
                         isLoading = false
                     )
                 )
@@ -132,7 +132,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun refreshHomeDataOnChange(books: List<Book>) {
-        // If user is no longer new → update AI pick, rediscover, recent activity
         if (books.isNotEmpty()) {
             loadHomeData()
         }

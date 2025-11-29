@@ -20,22 +20,30 @@ sealed class BookState{
 class BookViewModel @Inject constructor(
     private val repository: BookRepository
 ) : ViewModel() {
+
     private val _state = MutableStateFlow<BookState>(BookState.Loading)
     val state: StateFlow<BookState> = _state
 
     init {
-        fetchBooks()
+        observeBooks()
+        refresh()
     }
 
-    private fun fetchBooks(){
-        viewModelScope.launch{
-            try{
-                val response = repository.getBooks()
-                _state.value = BookState.Success(response)
-            } catch (e: Exception){
-                _state.value = BookState.Error("Failed to fetch books")
+    private fun observeBooks() {
+        viewModelScope.launch {
+            repository.books.collect { newBooks ->
+                _state.value = BookState.Success(newBooks)
             }
+        }
+    }
 
+    fun refresh() {
+        viewModelScope.launch {
+            try {
+                repository.refreshBooks()
+            } catch (e: Exception) {
+                _state.value = BookState.Error("Failed to refresh books")
+            }
         }
     }
 }

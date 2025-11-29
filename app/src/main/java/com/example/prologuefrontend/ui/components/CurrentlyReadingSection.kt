@@ -1,5 +1,6 @@
 package com.example.prologuefrontend.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +32,6 @@ fun CurrentlyReadingSection(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Section Title
         Text(
             text = "Currently Reading",
             style = MaterialTheme.typography.titleMedium.copy(

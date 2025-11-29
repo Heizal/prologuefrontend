@@ -186,7 +186,8 @@ private fun HomeScreenContent(
                 ) {
                     items(books) { book ->
                         CurrentReadingCard(
-                            book = book
+                            book = book,
+                            onClick = { onBookClick(book.infoLink) }
                         )
                     }
                 }

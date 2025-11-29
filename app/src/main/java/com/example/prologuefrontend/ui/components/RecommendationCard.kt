@@ -64,7 +64,6 @@ fun RecommendationCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                Log.d("ThumbnailCheck", "Thumbnail URL: ${book.thumbnailUrl}")
 
                 AsyncImage(
                     model = ImageRequest.Builder(context)

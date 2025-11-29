@@ -47,7 +47,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.rememberAsyncImagePainter
 import com.example.prologuefrontend.R
@@ -62,30 +64,31 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
 
     val context = LocalContext.current
 
+    val onBookClick: (String?) -> Unit = let@{ link ->
+        if (link.isNullOrBlank()) {
+            Toast.makeText(context, "No info available", Toast.LENGTH_SHORT).show()
+            return@let
+        }
 
-    val onBookClick: (String?) -> Unit = { link ->
-        if (!link.isNullOrBlank()) {
+        val uri = Uri.parse(link)
+
+        // 1️⃣ Local uploaded PDFs → open with PDF viewer
+        if (link.startsWith("file://")) {
             try {
-                val uri = Uri.parse(link)
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(uri, "application/pdf") // Defaulting to PDF, change if you support EPUBs
+                val pdfIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/pdf")
                     flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_GRANT_READ_URI_PERMISSION
                 }
-
-                // Create a chooser so the user can pick their preferred app
-                val chooser = Intent.createChooser(intent, "Open book with")
-                context.startActivity(chooser)
-            } catch (e: Exception) {
-                // Fallback: Try opening as a generic web link if no PDF viewer is found
-                try {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                    context.startActivity(browserIntent)
-                } catch (e2: Exception) {
-                    Toast.makeText(context, "Could not open book", Toast.LENGTH_SHORT).show()
-                }
+                context.startActivity(pdfIntent)
+                return@let
+            } catch (_: Exception) {
             }
-        } else {
-            Toast.makeText(context, "File path not found", Toast.LENGTH_SHORT).show()
+        }
+        try {
+            val browserIntent = Intent(Intent.ACTION_VIEW, uri)
+            context.startActivity(browserIntent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Could not open link", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -95,7 +98,6 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
         uri?.let { viewModel.uploadBook(it) }
     }
 
-    // 2. Pass state and events to the stateless composable
     MyBooksContent(
         uiState = uiState,
         onQueryChange = viewModel::onSearchQueryChange,
@@ -125,14 +127,12 @@ fun MyBooksContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Handle Loading
         if (uiState.isLoading && uiState.books.isEmpty()) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
 
-        // Handle Error
         if (uiState.error != null && !uiState.isLoading) {
             Text(
                 text = uiState.error,
@@ -141,7 +141,6 @@ fun MyBooksContent(
             )
         }
 
-        // Handle Content
         if (uiState.books.isEmpty() && !uiState.isLoading && uiState.error == null) {
             if (uiState.query.isNotEmpty()) {
                 Text(
@@ -307,45 +306,56 @@ fun BookCard(
         model = book.thumbnailUrl ?: R.drawable.default_cover,
         error = painterResource(R.drawable.default_cover)
     )
-    Card(
+
+    Column(
         modifier = modifier
             .padding(4.dp)
-            .clickable { onBookClick(book.infoLink) },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .clickable { onBookClick(book.infoLink) }
     ) {
-        Column {
+
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+        ) {
             Image(
                 painter = painter,
                 contentDescription = book.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .height(180.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxSize()
             )
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(
-                    text = book.title,
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column {
+            Text(
+                text = book.title,
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = book.author,
-                        fontWeight = FontWeight.Light,
-                        maxLines = 1
-                    )
-                    if (book.progress > 0) {
-                        Text(
-                            text = " . ${book.progress.toInt()}%",
-                            fontWeight = FontWeight.Light,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
+                    fontSize = 14.sp
+                ),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = if (book.progress > 0) "${book.progress.toInt()}% complete" else book.author,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
+
 
 

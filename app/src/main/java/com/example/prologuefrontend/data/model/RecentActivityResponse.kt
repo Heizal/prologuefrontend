@@ -8,12 +8,14 @@ data class RecentActivityResponse(
 data class RecentBookResponse(
     val title: String?,
     val author: String?,
-    val thumbnailUrl: String?
+    val thumbnailUrl: String?,
+    val infoLink: String?,
 )
 
 data class RecentRecResponse(
     val title: String?,
     val author: String?,
     val thumbnailUrl: String?,
+    val infoLink: String?,
     val reason: String?
 )

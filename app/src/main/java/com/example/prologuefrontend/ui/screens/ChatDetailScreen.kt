@@ -1,5 +1,7 @@
 package com.example.prologuefrontend.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -194,6 +197,7 @@ private fun ChatDetailContent(
     detail: ChatDetail,
     onAskAgain: (String) -> Unit
 ) {
+    val context = LocalContext.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 16.dp, horizontal = 20.dp),
@@ -251,7 +255,17 @@ private fun ChatDetailContent(
 
         // Recommendations List
         items(detail.recommendations) { rec ->
-            DetailBookCard(rec, onBookClick = {})
+            DetailBookCard(
+                book = rec,
+                onBookClick = { link ->
+                    if (!link.isNullOrBlank()) {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                            context.startActivity(intent)
+                        } catch (e: Exception) {}
+                    }
+                }
+            )
         }
 
         // Bottom Action Button
