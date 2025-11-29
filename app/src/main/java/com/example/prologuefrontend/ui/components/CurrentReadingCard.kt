@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,88 +42,79 @@ fun CurrentReadingCard(
     book: Book,
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
-){
-    val backgroundColor = Color(0xFFE5E8EC)
+) {
     val imagePainter = if (!book.thumbnailUrl.isNullOrBlank()) {
         rememberAsyncImagePainter(book.thumbnailUrl)
     } else {
         painterResource(id = R.drawable.default_cover)
     }
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = backgroundColor
-        ),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .width(300.dp)
-            .height(140.dp)
-            .clickable(enabled = onClick != null) { onClick?.invoke() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
 
-    ){
-        Row(
+    Column(
+        modifier = modifier
+            .width(140.dp)
+            .clickable(enabled = onClick != null) { onClick?.invoke() }
+    ) {
+        Card(
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            Image(
-                painter = imagePainter,
-                contentDescription = book.title,
-                modifier = Modifier
-                    .size(80.dp)
-                    .background(Color.LightGray)
-                    .clip(RoundedCornerShape(10.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(Modifier.width(16.dp))
+                .fillMaxWidth()
+                .aspectRatio(0.65f)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(160.dp),
-                verticalArrangement = Arrangement.Center
-            ){
-                Text(
-                    book.title,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    "By ${book.author}",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = Color.Gray,
-                        fontSize = 13.sp
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(6.dp))
-                LinearProgressIndicator(
-                    progress = { (book.progress/100f).coerceIn(0f, 1f) },
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = Color(0xFF1E5D58),
-                    trackColor = Color.LightGray
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "${book.progress}% completed",
-                    color = Color.DarkGray,
-                    fontSize = 12.sp
+                        .matchParentSize()
+                        .background(Color.LightGray)
                 )
 
+                Image(
+                    painter = imagePainter,
+                    contentDescription = book.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize()
+                )
+
+                if (book.progress > 0) {
+                    LinearProgressIndicator(
+                        progress = { (book.progress / 100f).coerceIn(0f, 1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .align(Alignment.BottomCenter),
+                        color = Color(0xFF4CAF50),
+                        trackColor = Color.Black.copy(alpha = 0.3f),
+                        gapSize = 0.dp,
+                        drawStopIndicator = {}
+                    )
+                }
             }
-
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = book.title,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            ),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = if (book.progress > 0) "${book.progress.toInt()}% complete" else book.author,
+            style = MaterialTheme.typography.bodySmall.copy(
+                color = Color.Gray,
+                fontSize = 12.sp
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

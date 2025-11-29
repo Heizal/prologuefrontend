@@ -102,7 +102,7 @@ fun AIPickCard(
         },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF8F4FF)
+            containerColor = Color(0xFFFFFFFF)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
