@@ -1,6 +1,5 @@
 package com.example.prologuefrontend.data.remote
 
-import com.example.prologuefrontend.data.remote.AuthApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
