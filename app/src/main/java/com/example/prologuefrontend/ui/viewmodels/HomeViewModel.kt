@@ -32,12 +32,21 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadBooks()
-        loadHomeData()
+        observeBooks()
     }
 
     private fun loadBooks() {
         viewModelScope.launch {
             _books.value = bookRepository.getBooks().reversed()
+        }
+    }
+
+    private fun observeBooks() {
+        viewModelScope.launch {
+            bookRepository.books.collect { newBooks ->
+                _books.value = newBooks
+                refreshHomeDataOnChange(newBooks)
+            }
         }
     }
 
@@ -119,6 +128,13 @@ class HomeViewModel @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    private fun refreshHomeDataOnChange(books: List<Book>) {
+        // If user is no longer new → update AI pick, rediscover, recent activity
+        if (books.isNotEmpty()) {
+            loadHomeData()
         }
     }
 }

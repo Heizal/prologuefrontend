@@ -95,9 +95,11 @@ class DiscoverViewModel @Inject constructor(
     fun addBook(book: RecommendationBookDto) {
         val screen = _state.value.screen as? ScreenState.Recommendations ?: return
 
+        val key = book.title.lowercase() + "|" + book.author.lowercase()
+
         _state.update {
             it.copy(
-                screen = screen.copy(inLibrary = screen.inLibrary + book.id)
+                screen = screen.copy(inLibrary = screen.inLibrary + key)
             )
         }
 
@@ -116,7 +118,7 @@ class DiscoverViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
-                        screen = screen.copy(inLibrary = screen.inLibrary - book.id)
+                        screen = screen.copy(inLibrary = screen.inLibrary - key)
                     )
                 }
             }

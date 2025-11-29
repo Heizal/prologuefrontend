@@ -11,6 +11,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -23,12 +25,15 @@ class BookRepository  @Inject constructor(
     private val api: ApiService,
     @ApplicationContext private val appContext: Context
 ) {
+    private val _books = MutableStateFlow<List<Book>>(emptyList())
+    val books: StateFlow<List<Book>> = _books
+
+    suspend fun refreshBooks() {
+        val result = api.getBooks()
+        _books.value = result.reversed()
+    }
     suspend fun getBooks(query: String? = null): List<Book> {
         return api.getBooks(query)
-    }
-
-    suspend fun deleteBook(id: Long) {
-        api.deleteBook(id)
     }
 
     suspend fun uploadBook(fileUri: Uri, cacheDir: File): Book = withContext(Dispatchers.IO) {
@@ -43,6 +48,7 @@ class BookRepository  @Inject constructor(
 
         val requestFile = tempFile.asRequestBody("multipart/form-data".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
+        refreshBooks()
         api.uploadBook(body)
     }
 

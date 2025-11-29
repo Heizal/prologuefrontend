@@ -9,14 +9,17 @@ import javax.inject.Singleton
 
 @Singleton
 class DiscoverRepository @Inject constructor(
-    private val api: ApiService
+    private val api: ApiService,
+    private val bookRepository: BookRepository
 ) {
+
     suspend fun fetchRecommendations(prompt: String): RecommendationResponse{
         return api.getRecommendations(RecommendationRequest(prompt.trim()))
     }
 
     suspend fun addBookToLibrary(book: Book): Book {
-        return api.addBook(book)
-
+        val saved = api.addBook(book)
+        bookRepository.refreshBooks() // 🔥 IMPORTANT
+        return saved
     }
 }

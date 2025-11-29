@@ -1,5 +1,8 @@
 package com.example.prologuefrontend.ui.screens
 
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -41,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,6 +60,35 @@ import com.example.prologuefrontend.ui.viewmodels.MyBooksViewModel
 fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val context = LocalContext.current
+
+
+    val onBookClick: (String?) -> Unit = { link ->
+        if (!link.isNullOrBlank()) {
+            try {
+                val uri = Uri.parse(link)
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/pdf") // Defaulting to PDF, change if you support EPUBs
+                    flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+
+                // Create a chooser so the user can pick their preferred app
+                val chooser = Intent.createChooser(intent, "Open book with")
+                context.startActivity(chooser)
+            } catch (e: Exception) {
+                // Fallback: Try opening as a generic web link if no PDF viewer is found
+                try {
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    context.startActivity(browserIntent)
+                } catch (e2: Exception) {
+                    Toast.makeText(context, "Could not open book", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(context, "File path not found", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -66,14 +99,16 @@ fun MyBooksScreen(viewModel: MyBooksViewModel = hiltViewModel()) {
     MyBooksContent(
         uiState = uiState,
         onQueryChange = viewModel::onSearchQueryChange,
-        onUploadClick = { launcher.launch("*/*") }
+        onUploadClick = { launcher.launch("*/*") },
+        onBookClick = onBookClick
     )
 }
 @Composable
 fun MyBooksContent(
     uiState: MyBooksUiState,
     onQueryChange: (String) -> Unit,
-    onUploadClick: () -> Unit
+    onUploadClick: () -> Unit,
+    onBookClick: (String?) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -119,12 +154,14 @@ fun MyBooksContent(
         } else {
             BookSection(
                 title = "Currently Reading",
-                books = uiState.books.filter { it.readingState == ReadingState.CURRENTLY_READING }
+                books = uiState.books.filter { it.readingState == ReadingState.CURRENTLY_READING },
+                onBookClick = onBookClick
             )
             Spacer(modifier = Modifier.height(12.dp))
             VerticalBookSection(
                 title = "Want to Read",
-                books = uiState.books.filter { it.readingState == ReadingState.WANT_TO_READ }
+                books = uiState.books.filter { it.readingState == ReadingState.WANT_TO_READ },
+                onBookClick = onBookClick
             )
         }
     }
@@ -188,7 +225,7 @@ fun EmptyLibrary(onUpload: () -> Unit) {
 }
 
 @Composable
-fun BookSection(title: String, books: List<Book>) {
+fun BookSection(title: String, books: List<Book>, onBookClick: (String?) -> Unit) {
     if (books.isEmpty()) return
 
     Column(
@@ -214,14 +251,14 @@ fun BookSection(title: String, books: List<Book>) {
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             items(books.size) { index ->
-                BookCard(books[index], modifier = Modifier.width(200.dp), onBookClick = {})
+                BookCard(books[index], modifier = Modifier.width(200.dp), onBookClick = {onBookClick(books[index].infoLink)})
             }
         }
     }
 }
 
 @Composable
-fun VerticalBookSection(title: String, books: List<Book>) {
+fun VerticalBookSection(title: String, books: List<Book>, onBookClick: (String?) -> Unit) {
     if (books.isEmpty()) return
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -247,7 +284,7 @@ fun VerticalBookSection(title: String, books: List<Book>) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     rowBooks.forEach { book ->
-                        BookCard(book = book, modifier = Modifier.weight(1f), onBookClick = {} )
+                        BookCard(book = book, modifier = Modifier.weight(1f), onBookClick = {onBookClick(book.infoLink)} )
                     }
                     if (rowBooks.size == 1) {
                         Spacer(modifier = Modifier.weight(1f))
@@ -273,7 +310,7 @@ fun BookCard(
     Card(
         modifier = modifier
             .padding(4.dp)
-            .clickable{ onBookClick(book.infoLink) },
+            .clickable { onBookClick(book.infoLink) },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

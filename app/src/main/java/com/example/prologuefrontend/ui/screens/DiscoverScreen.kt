@@ -274,7 +274,7 @@ private fun DiscoverContent(
                 items(screen.books) { book ->
                     RecommendationCard(
                         book = book,
-                        isInLibrary = screen.inLibrary.contains(book.id),
+                        isInLibrary = screen.inLibrary.contains(book.title.lowercase() + "|" + book.author.lowercase()) ,
                         onAddClick = { vm.addBook(it) },
                         onBookClick = { url ->
                             if (!url.isNullOrBlank()) {
