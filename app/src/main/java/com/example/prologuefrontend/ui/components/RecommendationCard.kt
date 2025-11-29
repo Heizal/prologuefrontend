@@ -2,6 +2,7 @@ package com.example.prologuefrontend.ui.components
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ fun RecommendationCard(
     book: RecommendationBookDto,
     isInLibrary: Boolean,
     onAddClick: (RecommendationBookDto) -> Unit,
+    onBookClick: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -47,6 +49,7 @@ fun RecommendationCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
+            .clickable { onBookClick(book.infoLink) }
     ) {
         Column(
             modifier = Modifier
@@ -68,7 +71,6 @@ fun RecommendationCard(
                         .data(book.thumbnailUrl)
                         .crossfade(true)
                         .build(),
-                    imageLoader = ImageLoader(context),
                     contentDescription = book.title,
                     modifier = Modifier
                         .size(100.dp)

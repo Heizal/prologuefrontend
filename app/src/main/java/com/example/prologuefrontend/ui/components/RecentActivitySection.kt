@@ -1,5 +1,6 @@
 package com.example.prologuefrontend.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.prologuefrontend.ui.viewmodels.HomeViewModel
 
 @Composable
-fun RecentActivitySection(homeViewModel: HomeViewModel = hiltViewModel()) {
+fun RecentActivitySection(homeViewModel: HomeViewModel = hiltViewModel(), onBookClick: (String?) -> Unit) {
     val ui by homeViewModel.uiState.collectAsState()
     val state = ui.activity
 
@@ -45,11 +46,17 @@ fun RecentActivitySection(homeViewModel: HomeViewModel = hiltViewModel()) {
                     Column(Modifier.padding(16.dp)) {
 
                         state.lastBookTitle?.let {
-                            Text("📖 You’re currently reading: $it")
+                            Text("📖 You’re currently reading: $it",
+                                 modifier = Modifier.clickable {
+                                     onBookClick(state.lastBookInfoLink)
+                                 })
                         }
 
                         state.lastAIPick?.let {
-                            Text("📚 Prologue recommended: $it")
+                            Text("📚 Prologue recommended: $it",
+                                 modifier = Modifier.clickable {
+                                     onBookClick(state.lastAIPickInfoLink)
+                                 })
                         }
                     }
                 }

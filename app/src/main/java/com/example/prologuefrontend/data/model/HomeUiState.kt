@@ -3,7 +3,7 @@ package com.example.prologuefrontend.data.model
 data class HomeUiState(
     val aiPick: HomePickUiState = HomePickUiState(),
     val rediscover: RediscoverUiState = RediscoverUiState(),
-    val activity: RecentActivityUiState = RecentActivityUiState()
+    val activity: RecentActivityUiState = RecentActivityUiState(),
 )
 
 data class HomePickUiState(
@@ -11,6 +11,7 @@ data class HomePickUiState(
     val author: String? = null,
     val thumbnailUrl: String? = null,
     val message: String? = null,
+    val infoLink: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -19,6 +20,7 @@ data class RediscoverUiState(
     val title: String? = null,
     val author: String? = null,
     val thumbnailUrl: String? = null,
+    val infoLink: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -28,6 +30,8 @@ data class RecentActivityUiState(
     val lastBookAuthor: String? = null,
     val lastAIPick: String? = null,
     val lastAIPickAuthor: String? = null,
+    val lastBookInfoLink: String? = null,
+    val lastAIPickInfoLink: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )

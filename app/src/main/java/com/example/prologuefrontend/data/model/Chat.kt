@@ -16,7 +16,8 @@ data class RecommendationBookDto(
     val title: String,
     val author: String,
     val thumbnailUrl: String,
-    val description: String
+    val description: String,
+    val infoLink: String?
 )
 
 data class RecommendationResponse(

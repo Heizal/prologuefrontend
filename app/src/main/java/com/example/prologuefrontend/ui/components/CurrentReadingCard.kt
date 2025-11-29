@@ -2,6 +2,7 @@ package com.example.prologuefrontend.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +36,11 @@ import com.example.prologuefrontend.R
 import com.example.prologuefrontend.data.model.Book
 
 @Composable
-fun CurrentReadingCard(book: Book){
+fun CurrentReadingCard(
+    book: Book,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+){
     val backgroundColor = Color(0xFFE5E8EC)
     val imagePainter = if (!book.thumbnailUrl.isNullOrBlank()) {
         rememberAsyncImagePainter(book.thumbnailUrl)
@@ -49,7 +54,8 @@ fun CurrentReadingCard(book: Book){
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .width(300.dp)
-            .height(140.dp),
+            .height(140.dp)
+            .clickable(enabled = onClick != null) { onClick?.invoke() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
 
     ){

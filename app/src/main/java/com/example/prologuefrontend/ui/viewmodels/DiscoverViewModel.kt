@@ -109,7 +109,8 @@ class DiscoverViewModel @Inject constructor(
                         title = book.title,
                         author = book.author,
                         thumbnailUrl = book.thumbnailUrl,
-                        progress = 0
+                        progress = 0,
+                        infoLink = book.infoLink
                     )
                 )
             } catch (e: Exception) {

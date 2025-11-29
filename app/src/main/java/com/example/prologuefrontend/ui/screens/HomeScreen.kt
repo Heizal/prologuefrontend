@@ -1,6 +1,9 @@
 package com.example.prologuefrontend.ui.screens
 
 import AIPicksSection
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,8 +60,23 @@ fun HomeScreen(
     val books by homeViewModel.books.collectAsState()
     val homeState by homeViewModel.uiState.collectAsState()
     val user by userViewModel.user.collectAsState()
+    val context = LocalContext.current
 
     val username = user?.username ?: "Reader"
+
+    val onBookClick: (String?) -> Unit = { infoLink ->
+        if (!infoLink.isNullOrBlank()) {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(infoLink))
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(context, "Could not open link", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(context, "No info available for this book", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -72,7 +91,8 @@ fun HomeScreen(
                 username = username,
                 books = books,
                 navController = navController,
-                homeState = homeState
+                homeState = homeState,
+                onBookClick = onBookClick
             )
         }
     }
@@ -130,7 +150,8 @@ private fun HomeScreenContent(
     username: String,
     books: List<Book>,
     navController: NavHostController,
-    homeState: HomeUiState
+    homeState: HomeUiState,
+    onBookClick: (String?) -> Unit
 ) {
     val isNewUser = books.isEmpty()
 
@@ -164,13 +185,18 @@ private fun HomeScreenContent(
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(books) { book ->
-                        CurrentReadingCard(book = book)
+                        CurrentReadingCard(
+                            book = book
+                        )
                     }
                 }
             }
-            item { AIPicksSection(uiState = homeState.aiPick) }
-            item { RediscoverSection() }
-            item { RecentActivitySection() }
+            item { AIPicksSection(
+                uiState = homeState.aiPick,
+                onBookClick = onBookClick
+            ) }
+            item { RediscoverSection(onBookClick = onBookClick) }
+            item { RecentActivitySection(onBookClick = onBookClick) }
             item { Spacer(Modifier.height(80.dp)) }
         }
     }

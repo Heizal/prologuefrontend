@@ -1,4 +1,8 @@
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,7 +37,8 @@ import com.example.prologuefrontend.data.model.HomePickUiState
 @Composable
 fun AIPicksSection(
     uiState: HomePickUiState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBookClick: (String?) -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         // Section Header
@@ -65,7 +71,8 @@ fun AIPicksSection(
                 title = uiState.title ?: "Unknown Title",
                 author = uiState.author ?: "Unknown Author",
                 thumbnailUrl = uiState.thumbnailUrl,
-                aiMessage = uiState.message ?: "I think you'll enjoy this read!"
+                aiMessage = uiState.message ?: "I think you'll enjoy this read!",
+                infoLink = uiState.infoLink
             )
         }
     }
@@ -76,12 +83,23 @@ fun AIPickCard(
     title: String,
     author: String,
     thumbnailUrl: String?,
-    aiMessage: String
+    aiMessage: String,
+    infoLink: String?
 ) {
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(160.dp),
+            .height(160.dp)
+            .clickable {
+            if (infoLink != null) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(infoLink))
+                context.startActivity(intent)
+            } else {
+                Toast.makeText(context, "No info available", Toast.LENGTH_SHORT).show()
+            }
+        },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF8F4FF)

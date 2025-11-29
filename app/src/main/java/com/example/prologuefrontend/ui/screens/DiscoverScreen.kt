@@ -1,5 +1,7 @@
 package com.example.prologuefrontend.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -65,7 +68,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.prologuefrontend.R
-import com.example.prologuefrontend.data.model.DiscoverUiState
 import com.example.prologuefrontend.data.model.ScreenState
 import com.example.prologuefrontend.ui.components.PastChatsDrawer
 import com.example.prologuefrontend.ui.components.QuickPromptChip
@@ -208,6 +210,7 @@ private fun DiscoverContent(
     vm: DiscoverViewModel,
     listState: LazyListState
 ) {
+    val context = LocalContext.current
     when (screen) {
 
         is ScreenState.Initial -> {
@@ -272,7 +275,13 @@ private fun DiscoverContent(
                     RecommendationCard(
                         book = book,
                         isInLibrary = screen.inLibrary.contains(book.id),
-                        onAddClick = { vm.addBook(it) }
+                        onAddClick = { vm.addBook(it) },
+                        onBookClick = { url ->
+                            if (!url.isNullOrBlank()) {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                context.startActivity(intent)
+                            }
+                        }
                     )
                 }
 

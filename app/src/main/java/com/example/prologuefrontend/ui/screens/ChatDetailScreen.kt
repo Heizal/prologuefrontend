@@ -1,6 +1,7 @@
 package com.example.prologuefrontend.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.prologuefrontend.data.model.ChatDetail
 import com.example.prologuefrontend.data.model.DetailScreenState
 import com.example.prologuefrontend.data.model.RecommendationBookDto
 import com.example.prologuefrontend.ui.components.PastChatsDrawer
@@ -189,7 +191,7 @@ private fun ChatDetailTopBar(onMenuClick: () -> Unit) {
 
 @Composable
 private fun ChatDetailContent(
-    detail: com.example.prologuefrontend.data.model.ChatDetail,
+    detail: ChatDetail,
     onAskAgain: (String) -> Unit
 ) {
     LazyColumn(
@@ -249,7 +251,7 @@ private fun ChatDetailContent(
 
         // Recommendations List
         items(detail.recommendations) { rec ->
-            DetailBookCard(rec)
+            DetailBookCard(rec, onBookClick = {})
         }
 
         // Bottom Action Button
@@ -271,12 +273,16 @@ private fun ChatDetailContent(
 }
 
 @Composable
-fun DetailBookCard(book: RecommendationBookDto) {
+fun DetailBookCard(
+    book: RecommendationBookDto,
+    onBookClick: (String?)-> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
             .background(Color(0xFFF5F5F5))
+            .clickable { onBookClick(book.infoLink) }
             .padding(12.dp)
     ) {
         Row(

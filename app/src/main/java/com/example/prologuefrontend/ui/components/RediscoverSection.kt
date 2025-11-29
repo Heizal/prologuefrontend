@@ -1,6 +1,7 @@
 package com.example.prologuefrontend.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +29,10 @@ import coil3.compose.rememberAsyncImagePainter
 import com.example.prologuefrontend.ui.viewmodels.HomeViewModel
 
 @Composable
-fun RediscoverSection(homeViewModel: HomeViewModel = hiltViewModel()) {
+fun RediscoverSection(
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    onBookClick: (String?) -> Unit
+) {
     val ui by homeViewModel.uiState.collectAsState()
     val state = ui.rediscover
 
@@ -49,7 +53,11 @@ fun RediscoverSection(homeViewModel: HomeViewModel = hiltViewModel()) {
             else -> {
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF9E5)),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                        onBookClick(state.infoLink)
+                    }
                 ) {
                     Row(Modifier.padding(16.dp)) {
                         Image(

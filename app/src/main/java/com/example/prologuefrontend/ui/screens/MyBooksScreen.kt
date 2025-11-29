@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -213,7 +214,7 @@ fun BookSection(title: String, books: List<Book>) {
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             items(books.size) { index ->
-                BookCard(books[index], modifier = Modifier.width(200.dp))
+                BookCard(books[index], modifier = Modifier.width(200.dp), onBookClick = {})
             }
         }
     }
@@ -246,7 +247,7 @@ fun VerticalBookSection(title: String, books: List<Book>) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     rowBooks.forEach { book ->
-                        BookCard(book = book, modifier = Modifier.weight(1f))
+                        BookCard(book = book, modifier = Modifier.weight(1f), onBookClick = {} )
                     }
                     if (rowBooks.size == 1) {
                         Spacer(modifier = Modifier.weight(1f))
@@ -261,7 +262,8 @@ fun VerticalBookSection(title: String, books: List<Book>) {
 @Composable
 fun BookCard(
     book: Book,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBookClick: (String?) -> Unit
 ) {
     val painter = rememberAsyncImagePainter(
         placeholder = painterResource(R.drawable.default_cover),
@@ -270,7 +272,8 @@ fun BookCard(
     )
     Card(
         modifier = modifier
-            .padding(4.dp),
+            .padding(4.dp)
+            .clickable{ onBookClick(book.infoLink) },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

@@ -12,5 +12,6 @@ data class Book(
     val author: String,
     val thumbnailUrl: String? = null,
     val progress: Int = 0,
-    val readingState: ReadingState = ReadingState.WANT_TO_READ
+    val readingState: ReadingState = ReadingState.WANT_TO_READ,
+    val infoLink: String? = null
 )
