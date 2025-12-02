@@ -47,7 +47,7 @@ interface ApiService {
     @GET("users/me")
     suspend fun getMe(): UserResponse
 
-    @PATCH("users/me")
+    @PUT("users/me")
     suspend fun updateProfile(
         @Body body: UpdateProfileRequest
     ): UserResponse
