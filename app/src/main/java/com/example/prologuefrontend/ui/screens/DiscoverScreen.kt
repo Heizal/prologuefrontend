@@ -3,7 +3,6 @@ package com.example.prologuefrontend.ui.screens
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -274,7 +272,9 @@ private fun DiscoverContent(
                 items(screen.books) { book ->
                     RecommendationCard(
                         book = book,
-                        isInLibrary = screen.inLibrary.contains(book.title.lowercase() + "|" + book.author.lowercase()) ,
+                        isInLibrary = screen.inLibrary.contains(
+                            (book.title ?: "").lowercase() + "|" + (book.author ?: "").lowercase()
+                        ),
                         onAddClick = { vm.addBook(it) },
                         onBookClick = { url ->
                             if (!url.isNullOrBlank()) {
