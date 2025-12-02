@@ -102,10 +102,10 @@ This app communicates with the Prologue backend service:
 
 All additional details are located in the **docs/** folder:
 
-- [project_setup.md]()
-- [architecture_overview.md]()
-- [api_integration.md]() 
-- [ai_integration.md]()
+- [project_setup.md](https://github.com/Heizal/prologuefrontend/blob/main/docs/project_setup.md)
+- [architecture_overview.md](https://github.com/Heizal/prologuefrontend/blob/main/docs/architecture_overview.md)
+- [api_integration.md](https://github.com/Heizal/prologuefrontend/blob/main/docs/api_integration.md) 
+- [ai_integration.md](https://github.com/Heizal/prologuefrontend/blob/main/docs/project_setup.md)
 
 ## Credits
 Developed by **Patricia Heizal Nagginda** as part of the Capstone Project at

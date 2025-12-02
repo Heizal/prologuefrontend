@@ -135,6 +135,6 @@ The frontend relies on backend-level safety:
 Frontend does not store or process prompts locally beyond UI state.
 
 ## Related Docs
-- `api_integration.md `
-- `architecture_overview.md `
-- `project_setup.md`
+- api_integration.md
+- architecture_overview.md
+- project_setup.md
