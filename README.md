@@ -27,7 +27,7 @@ Prologue is a modern Android application designed to be your personal AI-powered
 
 ### Backend
 *   **Framework:** Spring Boot (Java)
-*   *[Link to Backend Repository]*(https://github.com/Heizal/prologue-backend)
+*   [Link to Backend Repository](https://github.com/Heizal/prologue-backend)
 
 ## 🏗 Architecture Overview
 Prologue follows a clean **MVVM architecture** with the Repository pattern to ensure separation of concerns and testability. The app utilizes a "Single Source of Truth" principle by mediating data between the remote backend and the local Room database.
