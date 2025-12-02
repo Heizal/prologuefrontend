@@ -96,7 +96,7 @@ This app communicates with the Prologue backend service:
 **You must run the backend in order to interact with the app**
 
 ## UI Preview
-[Screen recording here]()
+[Screen recording here](https://drive.google.com/file/d/1-NXay_R4B2S_e9j46h6gnlTLrqBhKUXG/view?usp=sharing)
 
 ## Further Documentation
 
